@@ -1,0 +1,49 @@
+﻿@page "/bikes"
+
+@using shu_bike_shop.Data
+@inject ApplicationContext ApplicationContext
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (ApplicationContext.Bikes == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var bike in ApplicationContext.Bikes)
+            {
+            <tr>
+                <td>@bike.Make</td>
+                <td>@bike.Model</td>
+                <td>@bike.Price</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike.Id)">
+                        <span class="oi oi-cart"></span>
+                    </button>
+                </td>
+
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private void AddProductToBasket(int productId)
+    {
+
+    }
+}
