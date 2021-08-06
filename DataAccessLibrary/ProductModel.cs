@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace shu_bike_shop.Data
+namespace DataAccessLibrary
 {
-    public abstract class Product
+    public abstract class ProductModel
     {
-        public abstract string Name { get; }
         public int Id { get; set; }
         public int Price { get; set; }
+
+        //public abstract string Name { get; }
     }
 }

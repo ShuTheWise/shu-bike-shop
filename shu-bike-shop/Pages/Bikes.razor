@@ -1,13 +1,15 @@
 ﻿@page "/bikes"
 
-@using shu_bike_shop.Data
-@inject ApplicationContext ApplicationContext
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IBikesData _db
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (ApplicationContext.Bikes == null)
+@if (bikes == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -23,26 +25,33 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var bike in ApplicationContext.Bikes)
+            @foreach (var bike in bikes)
             {
-            <tr>
-                <td>@bike.Make</td>
-                <td>@bike.Model</td>
-                <td>@bike.Price</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike.Id)">
-                        <span class="oi oi-cart"></span>
-                    </button>
-                </td>
+                <tr>
+                    <td>@bike.Make</td>
+                    <td>@bike.Model</td>
+                    <td> 1000 </td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike.Id)">
+                            <span class="oi oi-cart"></span>
+                        </button>
+                    </td>
 
-            </tr>
+                </tr>
             }
         </tbody>
     </table>
 }
 
 @code {
-    private void AddProductToBasket(int productId)
+    private List<BikeModel> bikes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bikes = await _db.GetBikes();
+    }
+
+    private void AddProductToBasket(int id)
     {
 
     }

@@ -1,3 +1,4 @@
+using DataAccessLibrary;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -32,22 +33,8 @@ namespace shu_bike_shop
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
-            var envVar = Configuration["DATABASE_URL"];
-
-            var uri = new Uri(envVar);
-            var username = uri.UserInfo.Split(':')[0];
-            var password = uri.UserInfo.Split(':')[1];
-
-            var connectionString =
-             "; Database=" + uri.AbsolutePath.Substring(1) +
-             "; Username=" + username +
-             "; Password=" + password +
-             "; Port=" + uri.Port +
-             "; SSL Mode=Require; Trust Server Certificate=true;";
-            
-            var builder = new NpgsqlConnectionStringBuilder(connectionString) { Host = uri.Host };
-
-            services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(builder.ConnectionString));
+            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<IBikesData, BikesData>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
