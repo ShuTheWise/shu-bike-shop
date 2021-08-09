@@ -56,5 +56,15 @@ namespace DataAccessLibrary
                 await connection.ExecuteAsync(sql, parameters);
             }
         }
+
+        public async Task<T> LoadSingle<T, U>(string sql, U parameters)
+        {
+            var connectionString = _config[ConnectionStringName];
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                var data = await connection.QuerySingleAsync<T>(sql, parameters);
+                return data;
+            }
+        }
     }
 }
