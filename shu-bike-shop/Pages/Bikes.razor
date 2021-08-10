@@ -3,11 +3,9 @@
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
 
-@inject IBikesData _db
-
-<h1>Weather forecast</h1>
-
-<p>This component demonstrates fetching data from a service.</p>
+@inject IBikesData bikesData
+@inject IBasketService basket;
+@inject IJSRuntime jSRuntime
 
 @if (bikes == null)
 {
@@ -21,6 +19,7 @@ else
                 <th>Make</th>
                 <th>Model</th>
                 <th>Price</th>
+                <th>Stock</th>
                 <th></th>
             </tr>
         </thead>
@@ -31,8 +30,9 @@ else
                     <td>@bike.Make</td>
                     <td>@bike.Model</td>
                     <td>@bike.Price</td>
+                    <td>@bike.Amount</td>
                     <td>
-                        <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike.Id)">
+                        <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike)">
                             <span class="oi oi-cart"></span>
                         </button>
                     </td>
@@ -48,11 +48,23 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        bikes = await _db.GetBikes();
+        bikes = await bikesData.GetBikes();
     }
 
-    private void AddProductToBasket(int id)
+    private async Task AddProductToBasket(ProductModel productModel)
     {
+        try
+        {
+            var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
 
+            if (add)
+            {
+                await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
+            }
+        }
+        catch (InsufficientProductAmountException ex)
+        {
+            await jSRuntime.Inform(ex.Message);
+        }
     }
 }

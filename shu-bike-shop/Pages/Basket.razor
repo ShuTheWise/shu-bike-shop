@@ -1,16 +1,64 @@
 ﻿@page "/basket"
+@inject IBasketService basketService;
+@inject IJSRuntime jSRuntime
 
-<h1>Basket</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (basketItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var basketItem in basketItems)
+            {
+                <tr>
+                    <td>@basketItem.Product.Name</td>
+                    <td>@basketItem.Quantity</td>
+                    <td>@basketItem.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div>
+        Total amount: @TotalAmount
+    </div>
+    <button class="btn btn-primary" @onclick="Buy">Buy all</button>
+}
 
 @code {
-    private int currentCount = 0;
+    private decimal TotalAmount;
+    private List<BasketItem> basketItems;
 
-    private void IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        basketItems = await basketService.GetBasketItems();
+        
+        RefreshTotalAmount();
+    }
+
+    private async Task Buy()
+    {
+        //if (!await JSRuntime.InvokeAsync<bool>("confirm", $" '{customer.Name}'?"))
+        //{
+
+        //}
+    }
+
+    private void RefreshTotalAmount()
+    {
+        TotalAmount = 0;
+        foreach (var item in basketItems)
+        {
+            TotalAmount += item.Price;
+        }
     }
 }

@@ -28,6 +28,7 @@ namespace shu_bike_shop
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+
             services.AddAuthentication(
                 CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
@@ -40,6 +41,8 @@ namespace shu_bike_shop
             services.AddTransient<IBikesData, BikesData>();
             services.AddTransient<IUserData, UserData>();
             services.AddTransient<IUserService, UserService>();
+
+            services.AddSingleton<IBasketService, BasketService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

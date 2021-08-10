@@ -8,8 +8,9 @@ namespace DataAccessLibrary
     public abstract class ProductModel
     {
         public int Id { get; set; }
-        public int Price { get; set; }
+        public decimal Price { get; set; }
+        public int Amount { get; set; }
 
-        //public abstract string Name { get; }
+        public abstract string Name { get; }
     }
 }
