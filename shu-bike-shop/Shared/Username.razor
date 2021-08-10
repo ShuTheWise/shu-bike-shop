@@ -1,0 +1,8 @@
+﻿<AuthorizeView>
+    <Authorized>
+        @context.User.Identity.Name
+    </Authorized>
+    <NotAuthorized>
+        User
+    </NotAuthorized>
+</AuthorizeView>
