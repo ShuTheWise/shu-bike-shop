@@ -1,0 +1,37 @@
+﻿@page "/login"
+@using System.Security.Claims
+<AuthorizeView>
+    <Authorized>
+        <b>Hello, @context.User.Identity.Name!</b>
+        <a class="ml-md-auto btn btn-primary"
+           href="/logout?returnUrl=/"
+           target="_top">Logout</a>
+
+        <div>
+            Roles:
+            <ol>
+                @foreach (var item in GetRoles(context.User))
+                {
+                    <li>@item</li>
+                }
+            </ol>
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <Login></Login>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code{
+
+    private IEnumerable<string> GetRoles(ClaimsPrincipal User)
+    {
+        var roles = ((ClaimsIdentity)User.Identity).Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value);
+
+        return roles;
+    }
+}

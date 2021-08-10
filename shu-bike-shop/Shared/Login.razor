@@ -1,0 +1,73 @@
+﻿@inject NavigationManager navigationManager;
+@inject IUserService userService;
+
+@using System.Web;
+<EditForm Model="@user" OnValidSubmit="@ValidateUser">
+    <div>
+        <br /><br /><br /><br /><br />
+    </div>
+    <div>
+        <h3 style="font-weight:bold; color:purple">Shu Bike Shop Login</h3>
+    </div>
+    <div>
+        <br />
+    </div>
+    <div class="col-12 row">
+        <input class="form-control col-12" @bind="user.EmailAddress" placeholder="email address" />
+    </div>
+    <br />
+    <div class="col-12 row">
+        <input type="password" class="form-control col-12" @bind="user.EncryptedPassword" placeholder="password" />
+    </div>
+    <br />
+    <div class="col-12 row">
+        <span class="col-12"></span>
+        <input type="submit" class="form-control col-6 btn btn-primary" value="Login" />
+        <a href="/signup" class="col-3">Sign up</a>
+    </div>
+    <br />
+    <div class="col-12 row" style="text-align:left; font-weight:bold">
+        <span class="col-12">@LoginMesssage</span>
+    </div>
+</EditForm>
+@code {
+    private UserLoginModel user;
+    public string LoginMesssage { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        user = new UserLoginModel();
+    }
+
+    private async Task<bool> ValidateUser()
+    {
+        try
+        {
+            var username = Encode(user.EmailAddress);
+            var password = Utility.Encrypt(user.EncryptedPassword);
+
+            var userModel = await userService.Login(new UserLoginModel()
+            {
+                EmailAddress = username,
+                EncryptedPassword = password
+            });
+
+            var href = $"/login?paramUsername={username}&paramPassword={password}";
+            navigationManager.NavigateTo(href, true);
+        }
+        catch (Exception ex)
+        {
+            LoginMesssage = "Invalid username or password";
+        }
+
+        return await Task.FromResult(true);
+    }
+
+    private string Encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
+}
