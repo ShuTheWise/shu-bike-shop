@@ -2,15 +2,9 @@
 @using System.Security.Claims
 <AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage">Manage account</a>
-        <a href="Identity/Account/Identity/Account/LogOut">Logout</a>
-
-        <button type="submit" class="nav-link btn btn-link">Log out</button>
-
         <form method="get" action="Identity/Account/Manage">
             <button type="submit" class="nav-link btn btn-link">Manage</button>
         </form>
-
         <form method="post" action="Identity/Account/LogOut">
             <button type="submit" class="nav-link btn btn-link">Log out</button>
         </form>
