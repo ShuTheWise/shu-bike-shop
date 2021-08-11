@@ -2,7 +2,7 @@
 {
     public class NewOrderModel
     {
-        public int UserId { get; set; }
+        public string UserEmail { get; set; }
         public decimal TotalAmount { get; set; }
     }
 }

@@ -37,7 +37,7 @@ namespace shu_bike_shop.Pages
 
             }
 
-            UserModel userModel = null;
+            DataAccessLibrary.Models.UserModel userModel = null;
             try
             {
                 userModel = await userService.Login(new UserLoginModel()

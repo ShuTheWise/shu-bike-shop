@@ -27,7 +27,7 @@ namespace DataAccessLibrary
 
         public async Task<OrderModel> AddOrder(NewOrderModel orderModel)
         {
-            string sql = @$"insert into orders (userid, status, totalamount) values (@UserId, '{OrderStatus.New}', @TotalAmount) returning id";
+            string sql = @$"insert into orders (useremail, status, totalamount) values (@UserEmail, '{OrderStatus.New}', @TotalAmount) returning id";
             var orderId = await _db.SaveData<NewOrderModel, int>(sql, orderModel);
 
             return new OrderModel(orderId, orderModel);

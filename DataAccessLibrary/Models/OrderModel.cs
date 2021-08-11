@@ -9,13 +9,13 @@ namespace DataAccessLibrary.Models
         public OrderModel(int id, NewOrderModel newOrderModel)
         {
             Id = id;
-            UserId = newOrderModel.UserId;
+            UserEmail = newOrderModel.UserEmail;
             TotalAmount = newOrderModel.TotalAmount;
             Status = OrderStatus.New;
         }
 
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public string UserEmail { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderStatus Status { get; set; }
         public bool Paid { get; set; }

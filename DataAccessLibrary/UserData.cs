@@ -7,7 +7,7 @@ namespace DataAccessLibrary
     public class UserData : IUserData
     {
         private readonly ISqlDataAccess _db;
-
+        
         public UserData(ISqlDataAccess db)
         {
             _db = db;

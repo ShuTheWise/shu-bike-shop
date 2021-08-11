@@ -1,0 +1,71 @@
+﻿@page "/orders"
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IOrderData orderData
+@inject IJSRuntime jSRuntime
+
+@if (orders == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!orders.Any())
+{
+    <p><em>No orders</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Status</th>
+                <th>Paid</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.Status</td>
+                    <td>@order.Paid</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
+                            <span class="oi oi-dollar"> Pay</span>
+                        </button>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderModel> orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await orderData.GetOrders(0);
+    }
+
+    private async Task PayForOrder(OrderModel productModel)
+    {
+        //try
+        //{
+        //    var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
+
+        //    if (add)
+        //    {
+        //        await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
+        //    }
+        //}
+        //catch (InsufficientProductAmountException ex)
+        //{
+        //    await jSRuntime.Inform(ex.Message);
+        //}
+    }
+}

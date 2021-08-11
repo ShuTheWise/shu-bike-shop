@@ -6,10 +6,16 @@
 @inject IBasketService basketService
 @inject IOrderData orderData
 @inject IJSRuntime jSRuntime
+@inject IUserService userService
 
-@if (basketItems == null || !basketItems.Any())
+@if (basketItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!basketItems.Any())
 {
     <p><em>There is nothing in the basket</em></p>
+
 }
 else
 {
@@ -51,14 +57,16 @@ else
 
     private async Task Buy()
     {
+        var user = await userService.CurrentUser;
+
         var orderModel = await orderData.AddOrder(new NewOrderModel()
         {
-            UserId = 0, // get userid
+            UserEmail = user.Email,
             TotalAmount = TotalAmount
         });
 
         await basketService.ClearBasket();
-        basketItems = null;
+        basketItems = new List<BasketItemModel>();
 
         await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
     }
