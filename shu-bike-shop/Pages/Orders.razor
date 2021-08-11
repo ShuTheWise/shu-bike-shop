@@ -29,18 +29,18 @@ else
         <tbody>
             @foreach (var order in orders)
             {
-            <tr>
-                <td>@order.Id</td>
-                <td>@order.OrderStatus</td>
-                <td>@order.PaymentStatus</td>
-                <td>@order.TotalAmount</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
-                        <span class="oi oi-dollar"> Pay</span>
-                    </button>
-                </td>
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.OrderStatus</td>
+                    <td>@order.PaymentStatus</td>
+                    <td>@order.TotalAmount</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
+                            <span class="oi oi-dollar"> Pay</span>
+                        </button>
+                    </td>
 
-            </tr>
+                </tr>
             }
         </tbody>
     </table>
@@ -51,23 +51,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await orderData.GetOrders((await userService.CurrentUser).Email);
+        orders = await orderData.GetOrders((userService.CurrentUser).Email);
     }
 
     private async Task PayForOrder(OrderModel productModel)
     {
-        //try
-        //{
-        //    var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
+        var add = await jSRuntime.Confirm($"Pay for order ?");
 
-        //    if (add)
-        //    {
-        //        await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
-        //    }
-        //}
-        //catch (InsufficientProductAmountException ex)
-        //{
-        //    await jSRuntime.Inform(ex.Message);
-        //}
+        if (add)
+        {
+
+            //await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
+        }
     }
 }

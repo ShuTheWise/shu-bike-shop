@@ -40,17 +40,22 @@ namespace shu_bike_shop
             await userData.AddUser(userModel);
         }
 
-        public Task<User> CurrentUser
+        public User CurrentUser
         {
             get
             {
                 var user = httpContextAccessor.HttpContext.User;
 
-                return Task.FromResult(new User()
+                if (user.Identity.Name == null)
+                {
+                    return null;
+                }
+
+                return new User()
                 {
                     Email = user.Identity.Name,
                     Role = GetRole(user)
-                });
+                };
             }
         }
 

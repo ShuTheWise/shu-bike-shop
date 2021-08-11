@@ -6,7 +6,7 @@ namespace shu_bike_shop
 {
     public class BackofficeContext
     {
-        private string merchantId = "Test20210805200025806";
+        private string merchantId = "lkaMerchantWebshopTest";
         private string idempotenceKey = Guid.NewGuid().ToString();
 
         public void CreatePayment(CreatePaymentRequest createPaymentRequest)
