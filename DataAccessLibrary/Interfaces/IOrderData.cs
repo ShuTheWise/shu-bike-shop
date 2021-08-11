@@ -8,6 +8,6 @@ namespace DataAccessLibrary
     {
         Task<OrderModel> AddOrder(NewOrderModel orderModel);
         Task<List<OrderModel>> GetOrders();
-        Task<List<OrderModel>> GetOrders(int userId);
+        Task<List<OrderModel>> GetOrders(string userEmail);
     }
 }

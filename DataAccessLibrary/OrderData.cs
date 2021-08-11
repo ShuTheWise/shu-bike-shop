@@ -13,10 +13,10 @@ namespace DataAccessLibrary
             _db = db;
         }
 
-        public Task<List<OrderModel>> GetOrders(int userId)
+        public Task<List<OrderModel>> GetOrders(string userEmail)
         {
-            string sql = @"select * from orders where userid = @UserId";
-            return _db.LoadData<OrderModel, dynamic>(sql, new { userId });
+            string sql = @"select * from orders where useremail = @userEmail";
+            return _db.LoadData<OrderModel, dynamic>(sql, new { userEmail });
         }
 
         public Task<List<OrderModel>> GetOrders()
@@ -27,10 +27,32 @@ namespace DataAccessLibrary
 
         public async Task<OrderModel> AddOrder(NewOrderModel orderModel)
         {
-            string sql = @$"insert into orders (useremail, status, totalamount) values (@UserEmail, '{OrderStatus.New}', @TotalAmount) returning id";
+            var orderStatus = OrderStatus.New;
+            var paymentStatus = PaymentStatus.NotPaid;
+
+            string sql = @$"insert into orders (useremail, orderstatus, paymentstatus, totalamount) values (@UserEmail, '{orderStatus}', '{paymentStatus}', @TotalAmount) returning id";
+
             var orderId = await _db.SaveData<NewOrderModel, int>(sql, orderModel);
 
-            return new OrderModel(orderId, orderModel);
+            foreach (var item in orderModel.Items)
+            {
+                await AddOrderProducts(item, orderId);
+            }
+
+            return new OrderModel()
+            {
+                Id = orderId,
+                UserEmail = orderModel.UserEmail,
+                TotalAmount = orderModel.TotalAmount,
+                OrderStatus = orderStatus,
+                PaymentStatus = paymentStatus
+            };
+        }
+
+        private Task AddOrderProducts(OrderProductModel orderProductModel, int orderId)
+        {
+            string sql = @$"insert into orderproducts (orderid, productid, amount, unitprice) values ({orderId}, @ProductId, @Amount, @UnitPrice)";
+            return _db.SaveData(sql, orderProductModel);
         }
     }
 }

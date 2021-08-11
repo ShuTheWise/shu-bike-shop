@@ -22,7 +22,7 @@ namespace shu_bike_shop.Pages
         }
 
         public string ReturnUrl { get; set; }
-
+        
         public async Task<IActionResult> OnGetAsync(string paramUsername, string paramPassword)
         {
             string returnUrl = Url.Content("~/");

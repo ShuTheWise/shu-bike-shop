@@ -40,6 +40,7 @@ namespace shu_bike_shop
             services.AddSingleton<WeatherForecastService>();
 
             services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<IProductData, ProductData>();
             services.AddTransient<IBikesData, BikesData>();
             services.AddTransient<IUserData, UserData>();
             services.AddTransient<IUserService, UserService>();

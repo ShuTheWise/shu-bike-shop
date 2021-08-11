@@ -4,6 +4,7 @@
 @using DataAccessLibrary.Models
 
 @inject IOrderData orderData
+@inject IUserService userService
 @inject IJSRuntime jSRuntime
 
 @if (orders == null)
@@ -28,17 +29,18 @@ else
         <tbody>
             @foreach (var order in orders)
             {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.Status</td>
-                    <td>@order.Paid</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
-                            <span class="oi oi-dollar"> Pay</span>
-                        </button>
-                    </td>
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.OrderStatus</td>
+                <td>@order.PaymentStatus</td>
+                <td>@order.TotalAmount</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
+                        <span class="oi oi-dollar"> Pay</span>
+                    </button>
+                </td>
 
-                </tr>
+            </tr>
             }
         </tbody>
     </table>
@@ -49,7 +51,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await orderData.GetOrders(0);
+        orders = await orderData.GetOrders((await userService.CurrentUser).Email);
     }
 
     private async Task PayForOrder(OrderModel productModel)

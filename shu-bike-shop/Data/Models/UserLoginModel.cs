@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace shu_bike_shop
+﻿namespace shu_bike_shop
 {
     public class UserLoginModel
     {

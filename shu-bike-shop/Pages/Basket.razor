@@ -3,10 +3,11 @@
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
 
+@inject IJSRuntime jSRuntime
 @inject IBasketService basketService
 @inject IOrderData orderData
-@inject IJSRuntime jSRuntime
 @inject IUserService userService
+@inject IProductData productData
 
 @if (basketItems == null)
 {
@@ -15,7 +16,6 @@
 else if (!basketItems.Any())
 {
     <p><em>There is nothing in the basket</em></p>
-
 }
 else
 {
@@ -42,7 +42,7 @@ else
     <div>
         Total amount: @TotalAmount
     </div>
-    <button class="btn btn-primary" @onclick="Buy">Place order</button>
+    <button class="btn btn-primary" @onclick="PlaceOrder">Place order</button>
 }
 
 @code {
@@ -55,15 +55,26 @@ else
         RefreshTotalAmount();
     }
 
-    private async Task Buy()
+    private async Task PlaceOrder()
     {
         var user = await userService.CurrentUser;
 
         var orderModel = await orderData.AddOrder(new NewOrderModel()
         {
             UserEmail = user.Email,
-            TotalAmount = TotalAmount
+            TotalAmount = TotalAmount,
+            Items = basketItems.Select(x => new OrderProductModel
+            {
+                ProductId = x.Product.Id,
+                UnitPrice = x.Product.Price,
+                Amount = x.Quantity
+            }).ToList()
         });
+
+        foreach (var item in basketItems)
+        {
+            await productData.DecrementProductAmount(item.Product.Id, item.Quantity);
+        }
 
         await basketService.ClearBasket();
         basketItems = new List<BasketItemModel>();

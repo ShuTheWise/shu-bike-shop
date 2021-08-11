@@ -12,7 +12,8 @@ namespace shu_bike_shop
 
         public async Task AddProduct(ProductModel productModel, Func<Task<bool>> raiseQuantity = null)
         {
-            var basketItem = await GetBasketItem(productModel);
+            var productId = productModel.Id;
+            var basketItem = await GetBasketItem(productId);
 
             if (basketItem != null)
             {
@@ -22,7 +23,7 @@ namespace shu_bike_shop
 
                     if (result)
                     {
-                        await RaiseQuantity(productModel);
+                        await RaiseQuantity(productId);
                     }
                 }
             }
@@ -32,21 +33,21 @@ namespace shu_bike_shop
             }
         }
 
-        public async Task<BasketItemModel> GetBasketItem(ProductModel productModel)
+        public async Task<BasketItemModel> GetBasketItem(int productId)
         {
-            var basketItem = Products.FirstOrDefault(x => x.Product == productModel);
+            var basketItem = Products.FirstOrDefault(x => x.Product.Id == productId);
             return basketItem;
         }
 
-        public async Task RemoveProduct(ProductModel productModel)
+        public async Task RemoveProduct(int productId)
         {
-            var basketItem = await GetBasketItem(productModel);
+            var basketItem = await GetBasketItem(productId);
             Products.Remove(basketItem);
         }
 
-        public async Task RaiseQuantity(ProductModel productModel)
+        public async Task RaiseQuantity(int productId)
         {
-            var basketItem = Products.FirstOrDefault(x => x.Product == productModel);
+            var basketItem = await GetBasketItem(productId);
 
             if (basketItem.Quantity + 1 > basketItem.Product.Amount)
             {

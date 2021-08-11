@@ -9,7 +9,7 @@ namespace shu_bike_shop
     {
         Task AddProduct(ProductModel productModel, Func<Task<bool>> raiseQuantity);
         Task ClearBasket();
+        Task<BasketItemModel> GetBasketItem(int productId);
         Task<List<BasketItemModel>> GetBasketItems();
-        Task RemoveProduct(ProductModel productModel);
     }
 }

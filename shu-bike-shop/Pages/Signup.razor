@@ -1,6 +1,4 @@
 ﻿@page  "/signup"
-@using Data
-
 @inject IUserService userService
 
 <EditForm Model="@user" OnValidSubmit="@RegisterUser">
@@ -63,4 +61,5 @@
         }
 
         return await Task.FromResult(true);
-    } }
+    }
+}

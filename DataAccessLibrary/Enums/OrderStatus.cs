@@ -1,4 +1,4 @@
-﻿namespace DataAccessLibrary.Models
+﻿namespace DataAccessLibrary
 {
     public enum OrderStatus
     {
