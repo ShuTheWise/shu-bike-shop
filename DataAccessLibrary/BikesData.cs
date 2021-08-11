@@ -15,7 +15,7 @@ namespace DataAccessLibrary
 
         public Task<List<BikeModel>> GetBikes()
         {
-            string sql = "SELECT * FROM public.\"BikesView\"";
+            string sql = "SELECT * FROM bikesview";
             return _db.LoadData<BikeModel, dynamic>(sql, new { });
         }
     }

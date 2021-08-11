@@ -1,4 +1,4 @@
-﻿using DataAccessLibrary;
+﻿using DataAccessLibrary.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ namespace shu_bike_shop
 {
     public class BasketService : IBasketService
     {
-        private List<BasketItem> Products { get; } = new List<BasketItem>();
+        private List<BasketItemModel> Products { get; set; } = new List<BasketItemModel>();
 
         public async Task AddProduct(ProductModel productModel, Func<Task<bool>> raiseQuantity = null)
         {
@@ -28,11 +28,11 @@ namespace shu_bike_shop
             }
             else
             {
-                Products.Add(new BasketItem() { Product = productModel });
+                Products.Add(new BasketItemModel() { Product = productModel });
             }
         }
 
-        public async Task<BasketItem> GetBasketItem(ProductModel productModel)
+        public async Task<BasketItemModel> GetBasketItem(ProductModel productModel)
         {
             var basketItem = Products.FirstOrDefault(x => x.Product == productModel);
             return basketItem;
@@ -56,9 +56,15 @@ namespace shu_bike_shop
             basketItem.Quantity++;
         }
 
-        public Task<List<BasketItem>> GetBasketItems()
+        public Task<List<BasketItemModel>> GetBasketItems()
         {
             return Task.FromResult(Products);
+        }
+
+        public Task ClearBasket()
+        {
+            Products = new List<BasketItemModel>();
+            return Task.FromResult(true);
         }
     }
 }

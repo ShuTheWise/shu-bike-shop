@@ -1,10 +1,15 @@
 ﻿@page "/basket"
-@inject IBasketService basketService;
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IBasketService basketService
+@inject IOrderData orderData
 @inject IJSRuntime jSRuntime
 
-@if (basketItems == null)
+@if (basketItems == null || !basketItems.Any())
 {
-    <p><em>Loading...</em></p>
+    <p><em>There is nothing in the basket</em></p>
 }
 else
 {
@@ -31,26 +36,31 @@ else
     <div>
         Total amount: @TotalAmount
     </div>
-    <button class="btn btn-primary" @onclick="Buy">Buy all</button>
+    <button class="btn btn-primary" @onclick="Buy">Place order</button>
 }
 
 @code {
     private decimal TotalAmount;
-    private List<BasketItem> basketItems;
+    private List<BasketItemModel> basketItems;
 
     protected override async Task OnInitializedAsync()
     {
         basketItems = await basketService.GetBasketItems();
-        
         RefreshTotalAmount();
     }
 
     private async Task Buy()
     {
-        //if (!await JSRuntime.InvokeAsync<bool>("confirm", $" '{customer.Name}'?"))
-        //{
+        var orderModel = await orderData.AddOrder(new NewOrderModel()
+        {
+            UserId = 0, // get userid
+            TotalAmount = TotalAmount
+        });
 
-        //}
+        await basketService.ClearBasket();
+        basketItems = null;
+
+        await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
     }
 
     private void RefreshTotalAmount()

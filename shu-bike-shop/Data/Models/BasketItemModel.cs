@@ -1,7 +1,8 @@
-﻿using DataAccessLibrary;
+﻿using DataAccessLibrary.Models;
+
 namespace shu_bike_shop
 {
-    public class BasketItem
+    public class BasketItemModel
     {
         public ProductModel Product { get; set; }
         public int Quantity { get; set; } = 1;

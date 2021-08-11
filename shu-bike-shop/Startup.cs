@@ -41,6 +41,7 @@ namespace shu_bike_shop
             services.AddTransient<IBikesData, BikesData>();
             services.AddTransient<IUserData, UserData>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IOrderData, OrderData>();
 
             services.AddSingleton<IBasketService, BasketService>();
         }

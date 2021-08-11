@@ -1,4 +1,4 @@
-﻿namespace DataAccessLibrary
+﻿namespace DataAccessLibrary.Models
 {
     public class UserModel
     {
