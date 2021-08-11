@@ -8,10 +8,18 @@
         <NavLink class="nav-link" href="basket">
             <span class="oi oi-basket"></span>Basket
         </NavLink>
-        <NavLink class="nav-link" href="login">
-            <span class="oi oi-person"></span>
-            <Username></Username>
-        </NavLink>
+        <AuthorizeView>
+            <Authorized>
+                <NavLink class="nav-link" href="login">
+                    <span class="oi oi-person" aria-hidden="true"></span> @context.User.Identity.Name
+                </NavLink>
+            </Authorized>
+            <NotAuthorized>
+                <NavLink class="nav-link" href="Identity/Account/Login">
+                    <span class="oi oi-person" aria-hidden="true"></span> Login
+                </NavLink>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </div>
 
@@ -27,12 +35,9 @@
     </NavLink>
     <AuthorizeView>
         <Authorized>
-            @if (userService.CurrentUser.Role == DataAccessLibrary.Role.Admin)
-            {
-                <NavLink class="nav-link" href="connectionTest">
-                    <span class="oi oi-bolt" aria-hidden="true"></span> Connection Test
-                </NavLink>
-            }
+            <NavLink class="nav-link" href="connectionTest">
+                <span class="oi oi-bolt" aria-hidden="true"></span> Connection Test
+            </NavLink>
             <NavLink class="nav-link" href="orders">
                 <span class="oi oi-box" aria-hidden="true"></span> Orders
             </NavLink>

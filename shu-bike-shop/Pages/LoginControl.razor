@@ -2,11 +2,18 @@
 @using System.Security.Claims
 <AuthorizeView>
     <Authorized>
-        <b>Hello, @context.User.Identity.Name!</b>
-        <a class="ml-md-auto btn btn-primary"
-           href="/logout?returnUrl=/"
-           target="_top">Logout</a>
+        <a href="Identity/Account/Manage">Manage account</a>
+        <a href="Identity/Account/Identity/Account/LogOut">Logout</a>
 
+        <button type="submit" class="nav-link btn btn-link">Log out</button>
+
+        <form method="get" action="Identity/Account/Manage">
+            <button type="submit" class="nav-link btn btn-link">Manage</button>
+        </form>
+
+        <form method="post" action="Identity/Account/LogOut">
+            <button type="submit" class="nav-link btn btn-link">Log out</button>
+        </form>
         <div>
             Roles:
             <ol>
@@ -18,11 +25,8 @@
         </div>
     </Authorized>
     <NotAuthorized>
-        <Login></Login>
     </NotAuthorized>
 </AuthorizeView>
-
-
 @code{
 
     private IEnumerable<string> GetRoles(ClaimsPrincipal User)

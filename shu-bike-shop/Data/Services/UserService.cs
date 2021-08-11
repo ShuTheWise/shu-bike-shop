@@ -44,18 +44,19 @@ namespace shu_bike_shop
         {
             get
             {
-                var user = httpContextAccessor.HttpContext.User;
+                return null;
+                //var user = httpContextAccessor.HttpContext.User;
 
-                if (user.Identity.Name == null)
-                {
-                    return null;
-                }
+                //if (user.Identity.Name == null)
+                //{
+                //    return null;
+                //}
 
-                return new User()
-                {
-                    Email = user.Identity.Name,
-                    Role = GetRole(user)
-                };
+                //return new User()
+                //{
+                //    Email = user.Identity.Name,
+                //    Role = GetRole(user)
+                //};
             }
         }
 
