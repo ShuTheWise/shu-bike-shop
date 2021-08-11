@@ -2,9 +2,11 @@
 
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
+@using Ingenico.Direct.Sdk.Domain
 
 @inject IOrderData orderData
 @inject IUserService userService
+@inject IPaymentService paymentService
 @inject IJSRuntime jSRuntime
 
 @if (orders == null)
@@ -60,8 +62,16 @@ else
 
         if (add)
         {
+            try
+            {
+                //var res = await paymentService.c(createPaymentRequest);
+            }
+            catch
+            {
 
+            }
             //await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
+            //a
         }
     }
 }

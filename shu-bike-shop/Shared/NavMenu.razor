@@ -1,4 +1,6 @@
-﻿<div class="nav-item">
+﻿@inject IUserService userService
+
+<div class="nav-item">
     <div class="top-row pl-4 navbar navbar-dark">
         <a class="navbar-brand" href="">
             <img class="logo" src="images/logo.png" />
@@ -25,6 +27,12 @@
     </NavLink>
     <AuthorizeView>
         <Authorized>
+            @if (userService.CurrentUser.Role == DataAccessLibrary.Role.Admin)
+            {
+                <NavLink class="nav-link" href="connectionTest">
+                    <span class="oi oi-bolt" aria-hidden="true"></span> Connection Test
+                </NavLink>
+            }
             <NavLink class="nav-link" href="orders">
                 <span class="oi oi-box" aria-hidden="true"></span> Orders
             </NavLink>
