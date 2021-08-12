@@ -2,11 +2,11 @@
 
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
+@using Microsoft.AspNetCore.Identity;
 
 @inject IJSRuntime jSRuntime
 @inject IBasketService basketService
 @inject IOrderData orderData
-@inject IUserService userService
 @inject IProductData productData
 
 @if (basketItems == null)
@@ -40,68 +40,70 @@ else
         </tbody>
     </table>
     <div>
-        Total amount: @TotalAmount
+        Total amount: @totalAmount
     </div>
 
-    <button class="btn btn-primary" @onclick="PlaceOrder" disabled="@PlacingOrderDisabled">Place order</button>
+    <shu_bike_shop.Pages.Views.AdminView>
+        <button class="btn btn-primary" @onclick="PlaceOrder" disabled="@placingOrderDisabled">Place order</button>
+    </shu_bike_shop.Pages.Views.AdminView>
 
-    @if (PlacingOrderDisabled)
-    {
+    <shu_bike_shop.Pages.Views.AnonymousView>
         <div>
             <small>
                 You need to be logged in to place your order
             </small>
         </div>
-    }
+    </shu_bike_shop.Pages.Views.AnonymousView>
 }
 
 @code {
-    private bool PlacingOrderDisabled;
-    private decimal TotalAmount;
+    private bool placingOrderDisabled;
+    private decimal totalAmount;
     private List<BasketItemModel> basketItems;
+    private string user;
 
     protected override async Task OnInitializedAsync()
     {
         basketItems = await basketService.GetBasketItems();
         RefreshTotalAmount();
 
-        var user = userService.CurrentUser;
-        PlacingOrderDisabled = user == null || !user.CanBuy;
+        //var user = userService.CurrentUser;
+        //placingOrderDisabled = user == null || !user.CanBuy;
     }
 
     private async Task PlaceOrder()
     {
-        var user = userService.CurrentUser;
+        //var user = userService.CurrentUser;
 
-        var orderModel = await orderData.AddOrder(new NewOrderModel()
-        {
-            UserEmail = user.Email,
-            TotalAmount = TotalAmount,
-            Items = basketItems.Select(x => new OrderProductModel
-            {
-                ProductId = x.Product.Id,
-                UnitPrice = x.Product.Price,
-                Amount = x.Quantity
-            }).ToList()
-        });
+        //var orderModel = await orderData.AddOrder(new NewOrderModel()
+        //{
+        //    UserEmail = user.Email,
+        //    TotalAmount = totalAmount,
+        //    Items = basketItems.Select(x => new OrderProductModel
+        //    {
+        //        ProductId = x.Product.Id,
+        //        UnitPrice = x.Product.Price,
+        //        Amount = x.Quantity
+        //    }).ToList()
+        //});
 
-        foreach (var item in basketItems)
-        {
-            await productData.DecrementProductAmount(item.Product.Id, item.Quantity);
-        }
+        //foreach (var item in basketItems)
+        //{
+        //    await productData.DecrementProductAmount(item.Product.Id, item.Quantity);
+        //}
 
-        await basketService.ClearBasket();
-        basketItems = new List<BasketItemModel>();
+        //await basketService.ClearBasket();
+        //basketItems = new List<BasketItemModel>();
 
-        await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
+        //await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
     }
 
     private void RefreshTotalAmount()
     {
-        TotalAmount = 0;
+        totalAmount = 0;
         foreach (var item in basketItems)
         {
-            TotalAmount += item.Price;
+            totalAmount += item.Price;
         }
     }
 }

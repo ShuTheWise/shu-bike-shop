@@ -4,55 +4,63 @@
 @using DataAccessLibrary.Models
 
 @inject IOrderData orderData
-@inject IUserService userService
 @inject IPaymentService paymentService
 @inject IJSRuntime jSRuntime
 
-@if (orders == null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!orders.Any())
-{
-    <p><em>No orders</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Number</th>
-                <th>Status</th>
-                <th>Paid</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in orders)
-            {
-                <tr>
-                    <td>@order.Id</td>
-                    <td>@order.OrderStatus</td>
-                    <td>@order.PaymentStatus</td>
-                    <td>@order.TotalAmount</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="()=>PayForOrder(order)">
-                            <span class="oi oi-dollar"> Pay</span>
-                        </button>
-                    </td>
+<AuthorizeView>
+    <Authorized>
+        @{user = @context.User.Identity.Name;}
 
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        @if (orders == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (!orders.Any())
+        {
+            <p><em>No orders</em></p>
+        }
+        else
+        {
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Status</th>
+                        <th>Paid</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.OrderStatus</td>
+                            <td>@order.PaymentStatus</td>
+                            <td>@order.TotalAmount</td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="() => PayForOrder(order)">
+                                    <span class="oi oi-dollar"> Pay</span>
+                                </button>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
 
 @code {
+
+    private string user;
     private List<OrderModel> orders;
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await orderData.GetOrders((userService.CurrentUser).Email);
+        orders = await orderData.GetOrders(user);
     }
 
     private async Task PayForOrder(OrderModel productModel)
@@ -70,7 +78,6 @@ else
 
             }
             //await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
-            //a
         }
     }
 }

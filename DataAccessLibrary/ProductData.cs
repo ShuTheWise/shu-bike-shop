@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace DataAccessLibrary
 {
-
     public class ProductData : IProductData
     {
         private readonly ISqlDataAccess db;

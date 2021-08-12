@@ -1,6 +1,8 @@
 ﻿@using DataAccessLibrary.Models
 @using DataAccessLibrary
 
+@inject NavigationManager navigationManager
+@inject JSRuntime runtime
 @inject IBikesData bikesData
 
 <h1>Add bike </h1>
@@ -35,6 +37,14 @@
 
     private async Task HandleValidSubmit()
     {
-        var bike = await bikesData.AddBike(model);
+        try
+        {
+            var bike = await bikesData.AddBike(model);
+            navigationManager.NavigateTo("/bikes");
+        }
+        catch (Exception ex)
+        {
+            await runtime.Inform("Something went wrong");
+        }
     }
 }

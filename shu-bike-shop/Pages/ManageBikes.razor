@@ -1,0 +1,80 @@
+﻿@page "/managebikes"
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IBikesData bikesData
+@inject IBasketService basket
+@inject IJSRuntime jSRuntime
+
+<AuthorizeView>
+    <Authorized>
+        @if (context.User.IsInRole(UserService.ADMINISTRATION_ROLE))
+        {
+            @if (bikes == null)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bike</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bike in bikes)
+                        {
+                            <tr>
+                                @*<InputText @bind-Value="@bike.Model"> </InputText>
+                                    <InputText @bind-Value="@bike.Make"> </InputText>
+                                    <InputNumber @bind-Value="@bike.Year"> </InputNumber>
+                                    <InputNumber @bind-Value="@bike.Price"> </InputNumber>*@
+                                <input type="text" @bind="@bike.Model" />
+                                <input type="text" @bind="@bike.Make" />
+                                <input type="number" @bind="@bike.Year" />
+                                <input type="number" @bind="@bike.Price" />
+                                <td>
+                                    <button class="btn btn-primary" @onclick="()=>ChangeBike(bike)">
+                                        <span class="oi oi-check"></span> Apply
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="()=>DeleteBike(bike)">
+                                        <span class="oi oi-delete"></span> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div>
+                    @*  <AddBikes></AddBikes>*@
+                </div>
+            }
+        }
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private List<BikeModel> bikes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        bikes = await bikesData.GetBikes();
+    }
+
+    private async Task DeleteBike(ProductModel productModel)
+    {
+
+    }
+
+    private async Task ChangeBike(BikeModel bikeModel)
+    {
+
+    }
+}

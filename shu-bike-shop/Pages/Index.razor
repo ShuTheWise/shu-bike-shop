@@ -1,4 +1,20 @@
 ﻿@page "/"
+@inject IUserService s;
 
 <h1>Welcome to Shu Bike Shop!</h1>
 
+<AuthorizeView>
+    <Authorized>
+        @{ name = context.User.Identity.Name;}
+    </Authorized>
+</AuthorizeView>
+
+@code{
+
+    private string name;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        return s.AssignRole(name);
+    }
+}

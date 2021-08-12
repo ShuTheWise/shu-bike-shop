@@ -1,72 +1,55 @@
-﻿using DataAccessLibrary;
-using DataAccessLibrary.Models;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace shu_bike_shop
 {
     public class UserService : IUserService
     {
-        private IUserData userData;
-        private IHttpContextAccessor httpContextAccessor;
+        public static string ADMINISTRATION_ROLE = "Administrators";
+        public static string USER_ROLE = "Users";
 
-        public UserService(IUserData userData, IHttpContextAccessor httpContextAccessor)
+        private UserManager<IdentityUser> userManager;
+        private RoleManager<IdentityRole> roleManager;
+
+        public UserService(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
         {
-            this.userData = userData;
-            this.httpContextAccessor = httpContextAccessor;
-        }
+            this.roleManager = roleManager;
+            this.userManager = userManager;
 
-        public async Task<UserModel> Login(UserLoginModel user)
-        {
-            var authernicatedUser = await userData.AuthenticateUser(user.EmailAddress, user.EncryptedPassword);
-            return authernicatedUser;
-        }
 
-        public async Task RegisterUser(UserSignupModel user)
-        {
-            var encryptedPassword = Utility.Encrypt(user.Password);
+            var x =
+            userManager.Users;
 
-            var userModel = new UserModel()
+            foreach (var item in x)
             {
-                Email = user.EmailAddress,
-                EncryptedPassword = encryptedPassword,
-                Role = Role.User
-            };
-
-            await userData.AddUser(userModel);
-        }
-
-        public User CurrentUser
-        {
-            get
-            {
-                return null;
-                //var user = httpContextAccessor.HttpContext.User;
-
-                //if (user.Identity.Name == null)
-                //{
-                //    return null;
-                //}
-
-                //return new User()
-                //{
-                //    Email = user.Identity.Name,
-                //    Role = GetRole(user)
-                //};
             }
         }
 
-        private Role GetRole(ClaimsPrincipal User)
+        public async Task AssignRole(string username)
         {
-            var role = ((ClaimsIdentity)User.Identity).Claims
-                    .Where(c => c.Type == ClaimTypes.Role)
-                    .First().Value;
+            if (string.IsNullOrEmpty(username))
+            {
+                return;
+            }
 
-            return (Role)Enum.Parse(typeof(Role), role);
+            var user = await userManager.FindByNameAsync(username);
+            if (user != null)
+            {
+                var newRole = (username.ToLower().StartsWith("admin")) ? ADMINISTRATION_ROLE : USER_ROLE;
+
+                var role = await roleManager.FindByNameAsync(USER_ROLE);
+                if (role == null)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(USER_ROLE));
+                }
+
+                var userResult = await userManager.IsInRoleAsync(user, newRole);
+                if (!userResult)
+                {
+                    await userManager.AddToRoleAsync(user, newRole);
+                }
+            }
+            return;
         }
     }
 }

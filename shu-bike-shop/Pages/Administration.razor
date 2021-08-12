@@ -22,7 +22,7 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
-    string ADMINISTRATION_ROLE = StaticVariables.ADMINISTRATION_ROLE;
+    string ADMINISTRATION_ROLE = UserService.ADMINISTRATION_ROLE;
     System.Security.Claims.ClaimsPrincipal CurrentUser;
     protected override async Task OnInitializedAsync()
     {

@@ -25,25 +25,24 @@ else
         <tbody>
             @foreach (var bike in bikes)
             {
-                <tr>
-                    <td>@bike.Name</td>
-                    <td>@bike.Price</td>
-                    <td>@bike.Amount</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike)" disabled="@(bike.Amount < 1)">
-                            <span class="oi oi-cart"> Add to basket</span>
-                        </button>
-                    </td>
-
-                </tr>
+            <tr>
+                <td>@bike.Name</td>
+                <td>@bike.Price</td>
+                <td>@bike.Amount</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike)" disabled="@(bike.Amount < 1)">
+                        <span class="oi oi-cart"> Add to basket</span>
+                    </button>
+                </td>
+            </tr>
             }
         </tbody>
     </table>
     <AuthorizeView>
         <Authorized>
-            @if (@context.User.IsInRole(StaticVariables.ADMINISTRATION_ROLE))
+            @if (@context.User.IsInRole(UserService.ADMINISTRATION_ROLE))
             {
-                <AddBike></AddBike>
+                <AddBikes></AddBikes>
             }
         </Authorized>
     </AuthorizeView>
@@ -72,5 +71,22 @@ else
         {
             await jSRuntime.Inform(ex.Message);
         }
+    }
+
+    private async Task DeleteBike(ProductModel productModel)
+    {
+        //try
+        //{
+        //    var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
+
+        //    if (add)
+        //    {
+        //        await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
+        //    }
+        //}
+        //catch (InsufficientProductAmountException ex)
+        //{
+        //    await jSRuntime.Inform(ex.Message);
+        //}
     }
 }

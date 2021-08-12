@@ -1,6 +1,4 @@
-﻿@inject IUserService userService
-
-<div class="nav-item">
+﻿<div class="nav-item">
     <div class="top-row pl-4 navbar navbar-dark">
         <a class="navbar-brand" href="">
             <img class="logo" src="images/logo.png" />
@@ -30,18 +28,26 @@
     <NavLink class="nav-link" href="bikes">
         <span class="oi oi-layers" aria-hidden="true"></span> Bikes
     </NavLink>
-    <NavLink class="nav-link" href="parts">
-        <span class="oi oi-wrench" aria-hidden="true"></span> Parts
-    </NavLink>
     <AuthorizeView>
         <Authorized>
-            <NavLink class="nav-link" href="connectionTest">
-                <span class="oi oi-bolt" aria-hidden="true"></span> Connection Test
-            </NavLink>
-            <NavLink class="nav-link" href="orders">
-                <span class="oi oi-box" aria-hidden="true"></span> Orders
-            </NavLink>
+            @if (context.User.IsInRole(UserService.ADMINISTRATION_ROLE))
+            {
+                <NavLink class="nav-link" href="connectionTest">
+                    <span class="oi oi-bolt" aria-hidden="true"></span> Connection Test
+                </NavLink>
+                <NavLink class="nav-link" href="administation">
+                    <span class="oi oi-people" aria-hidden="true"></span> Administration
+                </NavLink>
+                <NavLink class="nav-link" href="managebikes">
+                    <span class="oi oi-wrench" aria-hidden="true"></span> Manage Bikes
+                </NavLink>
+            }
+            else if (context.User.IsInRole(UserService.USER_ROLE))
+            {
+                <NavLink class="nav-link" href="orders">
+                    <span class="oi oi-box" aria-hidden="true"></span> Orders
+                </NavLink>
+            }
         </Authorized>
     </AuthorizeView>
 </div>
-
