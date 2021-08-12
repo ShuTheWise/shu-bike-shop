@@ -2,13 +2,12 @@
 
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
-@using Microsoft.AspNetCore.Identity;
-
 
 @inject IJSRuntime jSRuntime
 @inject IBasketService basketService
 @inject IOrderData orderData
 @inject IProductData productData
+@inject ISecurityService securityService
 
 @if (basketItems == null)
 {
@@ -43,38 +42,39 @@ else
     <div>
         Total amount: @totalAmount
     </div>
-
-    <AuthorizeView Roles="Users">
-        <Authorized>
-            <button class="btn btn-primary" @onclick="()=>PlaceOrder(context.User.Identity.Name)">Place order</button>
-        </Authorized>
-        <NotAuthorized>
-            <button class="btn btn-primary" disabled="true">Place order</button>
-            <div>
-                <small>
-                    You need to be logged in to place your order.
-                </small>
-            </div>
-        </NotAuthorized>
-    </AuthorizeView>
+    <button class="btn btn-primary" disabled="@BuyingDisabled" @onclick="()=>PlaceOrder()">Place order</button>
+    @if (!canPlaceOrder)
+    {
+        <div>
+            <small>
+                You need to be logged in to place your order.
+            </small>
+        </div>
+    }
 }
 
 @code {
+    private bool canPlaceOrder { get; set; }
+
     private decimal totalAmount;
     private List<BasketItemModel> basketItems;
-    private string user;
 
     protected override async Task OnInitializedAsync()
     {
+        var user = securityService.CurrentUser;
+        canPlaceOrder = user != null && user.CanPlaceOrder;
+
         basketItems = await basketService.GetBasketItems();
         RefreshTotalAmount();
     }
 
-    private async Task PlaceOrder(string user)
+    private async Task PlaceOrder()
     {
+        var user = securityService.CurrentUser;
+
         var orderModel = await orderData.AddOrder(new OrderCreateModel()
         {
-            UserEmail = user,
+            UserEmail = user.Name,
             TotalAmount = totalAmount,
             Items = basketItems.Select(x => new OrderProductModel
             {
@@ -103,4 +103,6 @@ else
             totalAmount += item.Price;
         }
     }
+
+    private bool BuyingDisabled => !canPlaceOrder;
 }

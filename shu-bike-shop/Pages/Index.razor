@@ -1,20 +1,18 @@
 ﻿@page "/"
-@inject IUserService s;
+@inject IUserService userService
+@inject ISecurityService securitySerivce
 
 <h1>Welcome to Shu Bike Shop!</h1>
 
-<AuthorizeView>
-    <Authorized>
-        @{ name = context.User.Identity.Name;}
-    </Authorized>
-</AuthorizeView>
-
 @code{
-
     private string name;
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        return s.AssignRole(name);
+        var user = securitySerivce.CurrentUser;
+        if (user != null)
+        {
+            await userService.AssignRole(name);
+        }
     }
 }
