@@ -17,25 +17,7 @@ namespace DataAccessLibrary
 
         public SqlDataAccess(IConfiguration config)
         {
-            var databaseURL = config["DATABASE_URL"];
-
             this.config = config;
-            this.config[ConnectionStringName] = databaseURL;
-
-            var uri = new Uri(databaseURL);
-            var username = uri.UserInfo.Split(':')[0];
-            var password = uri.UserInfo.Split(':')[1];
-
-            var connectionString =
-             "; Database=" + uri.AbsolutePath.Substring(1) +
-             "; Username=" + username +
-             "; Password=" + password +
-             "; Port=" + uri.Port +
-             "; SSL Mode=Require; Trust Server Certificate=true;";
-
-            var builder = new NpgsqlConnectionStringBuilder(connectionString) { Host = uri.Host };
-
-            config[ConnectionStringName] = builder.ToString();
         }
 
         public async Task<List<T>> LoadData<T, U>(string sql, U parameters)

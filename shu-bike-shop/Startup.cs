@@ -29,25 +29,10 @@ namespace shu_bike_shop
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var databaseURL = Configuration["DATABASE_URL"];
-
-            var uri = new Uri(databaseURL);
-            var username = uri.UserInfo.Split(':')[0];
-            var password = uri.UserInfo.Split(':')[1];
-
-            var connectionString =
-             "; Database=" + uri.AbsolutePath.Substring(1) +
-             "; Username=" + username +
-             "; Password=" + password +
-             "; Port=" + uri.Port +
-             "; SSL Mode=Require; Trust Server Certificate=true;";
-
-            var builder = new NpgsqlConnectionStringBuilder(connectionString) { Host = uri.Host };
-
-            var connectionString2 = builder.ToString();
+            string connectionString = GetConnectionString();
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString2));
+                options.UseNpgsql(connectionString));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddDefaultTokenProviders()
@@ -55,13 +40,10 @@ namespace shu_bike_shop
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddHttpContextAccessor();
-
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddSingleton<WeatherForecastService>();
 
             services.AddTransient<ISqlDataAccess, SqlDataAccess>();
             services.AddTransient<IProductData, ProductData>();
@@ -102,6 +84,28 @@ namespace shu_bike_shop
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+        }
+
+        private string GetConnectionString()
+        {
+            var databaseURL = Configuration["DATABASE_URL"];
+
+            var uri = new Uri(databaseURL);
+            var username = uri.UserInfo.Split(':')[0];
+            var password = uri.UserInfo.Split(':')[1];
+
+            var connectionStringPart =
+             "; Database=" + uri.AbsolutePath.Substring(1) +
+             "; Username=" + username +
+             "; Password=" + password +
+             "; Port=" + uri.Port +
+             "; SSL Mode=Require; Trust Server Certificate=true;";
+
+            var builder = new NpgsqlConnectionStringBuilder(connectionStringPart) { Host = uri.Host };
+            var connectionString = builder.ToString();
+
+            Configuration["DefaultConnectionString"] = connectionString;
+            return connectionString;
         }
     }
 }
