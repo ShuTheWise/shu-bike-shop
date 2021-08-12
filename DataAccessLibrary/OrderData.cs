@@ -6,23 +6,23 @@ namespace DataAccessLibrary
 {
     public class OrderData : IOrderData
     {
-        private readonly ISqlDataAccess _db;
+        private readonly ISqlDataAccess db;
 
         public OrderData(ISqlDataAccess db)
         {
-            _db = db;
+            this.db = db;
         }
 
         public Task<List<OrderModel>> GetOrders(string userEmail)
         {
             string sql = @"select * from orders where useremail = @userEmail";
-            return _db.LoadData<OrderModel, dynamic>(sql, new { userEmail });
+            return db.LoadData<OrderModel, dynamic>(sql, new { userEmail });
         }
 
         public Task<List<OrderModel>> GetOrders()
         {
             string sql = @"select * from orders";
-            return _db.LoadData<OrderModel, dynamic>(sql, new { });
+            return db.LoadData<OrderModel, dynamic>(sql, new { });
         }
 
         public async Task<OrderModel> AddOrder(NewOrderModel orderModel)
@@ -31,8 +31,7 @@ namespace DataAccessLibrary
             var paymentStatus = PaymentStatus.NotPaid;
 
             string sql = @$"insert into orders (useremail, orderstatus, paymentstatus, totalamount) values (@UserEmail, '{orderStatus}', '{paymentStatus}', @TotalAmount) returning id";
-
-            var orderId = await _db.SaveData<NewOrderModel, int>(sql, orderModel);
+            var orderId = await db.SaveData<NewOrderModel, int>(sql, orderModel);
 
             foreach (var item in orderModel.Items)
             {
@@ -52,7 +51,7 @@ namespace DataAccessLibrary
         private Task AddOrderProducts(OrderProductModel orderProductModel, int orderId)
         {
             string sql = @$"insert into orderproducts (orderid, productid, amount, unitprice) values ({orderId}, @ProductId, @Amount, @UnitPrice)";
-            return _db.SaveData(sql, orderProductModel);
+            return db.SaveData(sql, orderProductModel);
         }
     }
 }
