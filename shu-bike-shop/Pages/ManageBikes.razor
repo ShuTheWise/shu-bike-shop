@@ -6,6 +6,7 @@
 @inject IBikesData bikesData
 @inject IBasketService basket
 @inject IJSRuntime jSRuntime
+@inject NavigationManager navigationManager
 
 <AuthorizeView>
     <Authorized>
@@ -20,7 +21,9 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Bike</th>
+                            <th>Make</th>
+                            <th>Stock</th>
+                            <th>Year</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th></th>
@@ -29,31 +32,38 @@
                     <tbody>
                         @foreach (var bike in bikes)
                         {
-                            <tr>
-                                @*<InputText @bind-Value="@bike.Model"> </InputText>
-                                    <InputText @bind-Value="@bike.Make"> </InputText>
-                                    <InputNumber @bind-Value="@bike.Year"> </InputNumber>
-                                    <InputNumber @bind-Value="@bike.Price"> </InputNumber>*@
-                                <input type="text" @bind="@bike.Model" />
-                                <input type="text" @bind="@bike.Make" />
-                                <input type="number" @bind="@bike.Year" />
-                                <input type="number" @bind="@bike.Price" />
-                                <td>
-                                    <button class="btn btn-primary" @onclick="()=>ChangeBike(bike)">
-                                        <span class="oi oi-check"></span> Apply
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-primary" @onclick="()=>DeleteBike(bike)">
-                                        <span class="oi oi-delete"></span> Delete
-                                    </button>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td>
+                                <input class="form-group mx-sm-1 mb-1" type="text" @bind="@bike.Make" />
+                            </td>
+                            <td>
+                                <input class="form-group" type="text" @bind="@bike.Model" />
+                            </td>
+                            <td>
+                                <input class="form-group" type="number" @bind="@bike.Year" />
+                            </td>
+                            <td>
+                                <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Price" />
+                            </td>
+                            <td>
+                                <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Amount" />
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="()=>UpdateBike(bike)">
+                                    <span class="oi oi-check"></span> Apply
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="()=>DeleteBike(bike)">
+                                    <span class="oi oi-delete"></span> Delete
+                                </button>
+                            </td>
+                        </tr>
                         }
                     </tbody>
                 </table>
                 <div>
-                    @*  <AddBikes></AddBikes>*@
+                    <AddBikes></AddBikes>
                 </div>
             }
         }
@@ -70,11 +80,23 @@
 
     private async Task DeleteBike(ProductModel productModel)
     {
-
+        await bikesData.RemoveBike(productModel.Id);
     }
 
-    private async Task ChangeBike(BikeModel bikeModel)
+    private async Task UpdateBike(BikeModel bikeModel)
     {
+        var updateModel = new BikeUpdateModel()
+        {
+            Id = bikeModel.Id,
+            Amount = bikeModel.Amount,
+            Make = bikeModel.Make,
+            Model = bikeModel.Model,
+            Price = bikeModel.Price,
+            Year = bikeModel.Year
+        };
 
+        await bikesData.UpdateBike(updateModel);
+
+        navigationManager.NavigateTo("/bikes");
     }
 }

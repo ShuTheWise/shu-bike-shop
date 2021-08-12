@@ -8,6 +8,8 @@ namespace DataAccessLibrary
     {
         Task<List<ProductModel>> GetProducts();
         Task DecrementProductAmount(int id, int amount);
-        Task<ProductModel> AddProduct(NewProductModel model);
+        Task<ProductModel> AddProduct(ProductCreateModel model);
+        Task<ProductModel> UpdateProduct(ProductUpdateModel model);
+        Task RemoveProduct(int id);
     }
 }

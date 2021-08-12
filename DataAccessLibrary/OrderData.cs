@@ -25,13 +25,13 @@ namespace DataAccessLibrary
             return db.LoadData<OrderModel, dynamic>(sql, new { });
         }
 
-        public async Task<OrderModel> AddOrder(NewOrderModel orderModel)
+        public async Task<OrderModel> AddOrder(OrderCreateModel orderModel)
         {
             var orderStatus = OrderStatus.New;
             var paymentStatus = PaymentStatus.NotPaid;
 
             string sql = @$"insert into orders (useremail, orderstatus, paymentstatus, totalamount) values (@UserEmail, '{orderStatus}', '{paymentStatus}', @TotalAmount) returning id";
-            var orderId = await db.SaveData<NewOrderModel, int>(sql, orderModel);
+            var orderId = await db.SaveData<OrderCreateModel, int>(sql, orderModel);
 
             foreach (var item in orderModel.Items)
             {

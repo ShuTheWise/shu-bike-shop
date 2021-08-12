@@ -2,15 +2,17 @@
 
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Http;
 
 @inject IOrderData orderData
 @inject IPaymentService paymentService
 @inject IJSRuntime jSRuntime
+@inject UserManager<IdentityUser> userManager
+@inject IHttpContextAccessor httpContextAccessor
 
-<AuthorizeView>
+<AuthorizeView Roles="Users">
     <Authorized>
-        @{user = @context.User.Identity.Name;}
-
         @if (orders == null)
         {
             <p><em>Loading...</em></p>
@@ -21,7 +23,6 @@
         }
         else
         {
-
             <table class="table">
                 <thead>
                     <tr>
@@ -54,13 +55,12 @@
 </AuthorizeView>
 
 @code {
-
     private string user;
     private List<OrderModel> orders;
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await orderData.GetOrders(user);
+        orders = await orderData.GetOrders(httpContextAccessor.HttpContext.User.Identity.Name);
     }
 
     private async Task PayForOrder(OrderModel productModel)

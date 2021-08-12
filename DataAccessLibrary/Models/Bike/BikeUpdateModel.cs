@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataAccessLibrary.Models
+﻿namespace DataAccessLibrary.Models
 {
     public class BikeUpdateModel
     {
+        public int Id { get; set; }
         public decimal Price { get; set; }
         public int Amount { get; set; }
         public string Model { get; set; }

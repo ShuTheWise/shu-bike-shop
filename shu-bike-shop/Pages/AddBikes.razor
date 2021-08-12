@@ -2,7 +2,7 @@
 @using DataAccessLibrary
 
 @inject NavigationManager navigationManager
-@inject JSRuntime runtime
+@inject IJSRuntime runtime
 @inject IBikesData bikesData
 
 <h1>Add bike </h1>
@@ -33,7 +33,7 @@
 </EditForm>
 
 @code{
-    private NewBikeModel model = new();
+    private BikeCreateModel model = new();
 
     private async Task HandleValidSubmit()
     {

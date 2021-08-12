@@ -15,14 +15,6 @@ namespace shu_bike_shop
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
-
-
-            var x =
-            userManager.Users;
-
-            foreach (var item in x)
-            {
-            }
         }
 
         public async Task AssignRole(string username)

@@ -38,14 +38,6 @@ else
             }
         </tbody>
     </table>
-    <AuthorizeView>
-        <Authorized>
-            @if (@context.User.IsInRole(UserService.ADMINISTRATION_ROLE))
-            {
-                <AddBikes></AddBikes>
-            }
-        </Authorized>
-    </AuthorizeView>
 }
 
 @code {
@@ -71,22 +63,5 @@ else
         {
             await jSRuntime.Inform(ex.Message);
         }
-    }
-
-    private async Task DeleteBike(ProductModel productModel)
-    {
-        //try
-        //{
-        //    var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
-
-        //    if (add)
-        //    {
-        //        await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
-        //    }
-        //}
-        //catch (InsufficientProductAmountException ex)
-        //{
-        //    await jSRuntime.Inform(ex.Message);
-        //}
     }
 }

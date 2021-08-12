@@ -2,7 +2,7 @@
 
 namespace DataAccessLibrary.Models
 {
-    public class NewOrderModel
+    public class OrderCreateModel
     {
         public string UserEmail { get; set; }
         public decimal TotalAmount { get; set; }

@@ -6,7 +6,7 @@ namespace DataAccessLibrary
 {
     public interface IOrderData
     {
-        Task<OrderModel> AddOrder(NewOrderModel orderModel);
+        Task<OrderModel> AddOrder(OrderCreateModel orderModel);
         Task<List<OrderModel>> GetOrders();
         Task<List<OrderModel>> GetOrders(string userEmail);
     }
