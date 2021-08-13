@@ -2,14 +2,13 @@
 
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
-@using Microsoft.AspNetCore.Identity;
-@using Microsoft.AspNetCore.Http;
 
 @inject IOrderData orderData
 @inject IPaymentService paymentService
+@inject ITransactionsData transactionData
 @inject IJSRuntime jSRuntime
-@inject UserManager<IdentityUser> userManager
-@inject IHttpContextAccessor httpContextAccessor
+@inject ISecurityService securityService
+@inject NavigationManager navigationManager
 
 <AuthorizeView Roles="Users">
     <Authorized>
@@ -41,7 +40,7 @@
                             <td>@order.PaymentStatus</td>
                             <td>@order.TotalAmount</td>
                             <td>
-                                <button class="btn btn-primary" @onclick="() => PayForOrder(order)">
+                                <button class="btn btn-primary" disabled="@IsPaid(order)" @onclick="() => PayForOrder(order)">
                                     <span class="oi oi-dollar"> Pay</span>
                                 </button>
                             </td>
@@ -54,30 +53,58 @@
     </Authorized>
 </AuthorizeView>
 
-@code {
-    private string user;
+@code
+{
+    private User user;
     private List<OrderModel> orders;
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await orderData.GetOrders(httpContextAccessor.HttpContext.User.Identity.Name);
+        user = securityService.CurrentUser;
+        await RefreshOrders();
     }
 
-    private async Task PayForOrder(OrderModel productModel)
+    private async Task RefreshOrders()
     {
+        if (user != null)
+        {
+            orders = await orderData.GetOrders(user.Name);
+        }
+    }
+
+    private bool IsPaid(OrderModel order) => order.PaymentStatus == PaymentStatus.Paid;
+
+    private async Task PayForOrder(OrderModel orderModel)
+    {
+        if (user == null)
+        {
+            return;
+        }
+
         var add = await jSRuntime.Confirm($"Pay for order ?");
 
         if (add)
         {
             try
             {
-                //var res = await paymentService.c(createPaymentRequest);
+                await transactionData.AddTransaction(new TransactionCreateModel()
+                {
+                    Username = user.Name,
+                    OrderId = orderModel.Id,
+                    Amount = orderModel.TotalAmount,
+                    PaymentMethod = PaymentMethod.Visa
+                });
+
+                await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
+
+                await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
+
+                await RefreshOrders();
             }
             catch
             {
 
             }
-            //await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
         }
     }
 }

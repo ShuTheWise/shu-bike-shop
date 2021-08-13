@@ -15,7 +15,7 @@ namespace DataAccessLibrary
 
         public Task<List<OrderModel>> GetOrders(string userEmail)
         {
-            string sql = @"select * from orders where useremail = @userEmail";
+            string sql = @"select * from orders where useremail = @userEmail order by id asc";
             return db.LoadData<OrderModel, dynamic>(sql, new { userEmail });
         }
 
@@ -52,6 +52,12 @@ namespace DataAccessLibrary
         {
             string sql = @$"insert into orderproducts (orderid, productid, amount, unitprice) values ({orderId}, @ProductId, @Amount, @UnitPrice)";
             return db.SaveData(sql, orderProductModel);
+        }
+
+        public async Task UpdateOrder(OrderUpdateModel orderModel)
+        {
+            string sql = @"update orders set orderStatus = @OrderStatus, paymentstatus = @PaymentStatus where id = @Id";
+            await db.SaveData(sql, orderModel);
         }
     }
 }
