@@ -34,5 +34,11 @@ namespace DataAccessLibrary
             string sql = "select * from transactions";
             return db.LoadData<TransactionModel, dynamic>(sql, new { });
         }
+
+        public async Task UpdateTransaction(TransactionUpdateModel transactionModel)
+        {
+            string sql = @"update transactions set paymentMethod = @PaymentMethod where id = @Id";
+            await db.SaveData(sql, transactionModel);
+        }
     }
 }

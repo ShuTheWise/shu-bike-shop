@@ -1,0 +1,76 @@
+﻿@page "/managetransactions"
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IOrderData orderData
+@inject IPaymentService paymentService
+@inject ITransactionsData transactionData
+@inject IJSRuntime jSRuntime
+@inject ISecurityService securityService
+@inject NavigationManager navigationManager
+
+<AuthorizeView Roles="Administrators">
+    <Authorized>
+        @if (transactions == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (!transactions.Any())
+        {
+            <p><em>No orders</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Transaction Id</th>
+                        <th>Order Id</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in transactions)
+                    {
+                    <tr>
+                        <td>@transaction.Id</td>
+                        <td>@transaction.OrderId</td>
+                        <td>@transaction.Username</td>
+                        <td>@transaction.Amount</td>
+                        <td>@transaction.PaymentMethod</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+@code
+{
+    private List<TransactionModel> transactions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshTransactions();
+    }
+
+    private async Task RefreshTransactions()
+    {
+        transactions = await transactionData.GetTransactions();
+    }
+
+    //private async Task UpdateTransaction(TransactionModel orderModel)
+    //{
+    //    var model = new TransactionUpdateModel()
+    //    {
+    //        Id = orderModel.Id,
+    //        PaymentMethod = orderModel.PaymentMethod
+    //    };
+
+    //    await RefreshTransactions();
+    //}
+}
