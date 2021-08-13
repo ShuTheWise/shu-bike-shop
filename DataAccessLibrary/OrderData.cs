@@ -21,7 +21,7 @@ namespace DataAccessLibrary
 
         public Task<List<OrderModel>> GetOrders()
         {
-            string sql = @"select * from orders";
+            string sql = @"select * from orders order by id asc";
             return db.LoadData<OrderModel, dynamic>(sql, new { });
         }
 

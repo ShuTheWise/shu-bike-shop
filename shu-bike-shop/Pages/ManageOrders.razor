@@ -1,0 +1,98 @@
+﻿@page "/manageorders"
+
+@using DataAccessLibrary
+@using DataAccessLibrary.Models
+
+@inject IOrderData orderData
+@inject IPaymentService paymentService
+@inject ITransactionsData transactionData
+@inject IJSRuntime jSRuntime
+@inject ISecurityService securityService
+@inject NavigationManager navigationManager
+
+<AuthorizeView Roles="Administrators">
+    <Authorized>
+        @if (orders == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (!orders.Any())
+        {
+            <p><em>No orders</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>User</th>
+                        <th>Total amount</th>
+                        <th>Order Status</th>
+                        <th>Payment Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.UserEmail</td>
+                        <td>@order.TotalAmount</td>
+                        <td>
+                            <select @bind="@order.OrderStatus">
+                                @foreach (var item in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select @bind="order.PaymentStatus">
+                                @foreach (var item in Enum.GetValues(typeof(PaymentStatus)))
+                                {
+                                    <option value="@item">@item</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="()=>UpdateOrder(order)">
+                                <span class="oi oi-check"></span> Apply
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+@code
+{
+    private List<OrderModel> orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshOrders();
+    }
+
+    private async Task RefreshOrders()
+    {
+        orders = await orderData.GetOrders();
+    }
+
+    private async Task UpdateOrder(OrderModel orderModel)
+    {
+        var model = new OrderUpdateModel()
+        {
+            Id = orderModel.Id,
+            OrderStatus = orderModel.OrderStatus,
+            PaymentStatus = orderModel.PaymentStatus
+        };
+
+        await orderData.UpdateOrder(model);
+
+        await RefreshOrders();
+    }
+}
