@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace shu_bike_shop
+namespace PaymentAccessService
 {
     public class PaymentService : IPaymentService
     {
         public string MerchantId => "lkaMerchantWebshopTest";
 
         private readonly IConfiguration config;
-        private string idempotenceKey = Guid.NewGuid().ToString();
+        //private string idempotenceKey = Guid.NewGuid().ToString();
 
         public PaymentService(IConfiguration config)
         {
@@ -28,11 +28,9 @@ namespace shu_bike_shop
         {
             var client = GetClient();
             var body = GetTestCreatePaymentRequest();
-
-
-            CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
-
-            return client.WithNewMerchant(MerchantId).Payments.CreatePayment(body, context);
+            //CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
+            
+            return client.WithNewMerchant(MerchantId).Payments.CreatePayment(body);
             //return GetClient().WithNewMerchant(MerchantId).Services.TestConnection();
         }
 
@@ -51,61 +49,62 @@ namespace shu_bike_shop
             return Factory.CreateClient(communicatorConfiguration);
         }
 
-        public CreatePaymentResponse CreatePayment(CreatePaymentRequest createPaymentRequest)
-        {
-            var client = GetClient();
-            CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
-            try
-            {
-                CreatePaymentResponse response = client.WithNewMerchant(MerchantId).Payments.CreatePayment(createPaymentRequest).GetAwaiter().GetResult();
-                return response;
-            }
-            catch (IdempotenceException e)
-            {
-                // A request with the same idempotenceKey is still in progress, try again after a short pause
-                // e.IdempotenceRequestTimestamp contains the value of the
-                // X-GCS-Idempotence-Request-Timestamp header
-            }
-            finally
-            {
-                long? idempotenceRequestTimestamp = context.IdempotenceRequestTimestamp;
-                // idempotenceRequestTimestamp contains the value of the
-                // X-GCS-Idempotence-Request-Timestamp header
-                // if idempotenceRequestTimestamp is not null this was not the first request
-            }
+        //public CreatePaymentResponse CreatePayment(CreatePaymentRequest createPaymentRequest)
+        //{
+        //    var client = GetClient();
+        //    CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
+        //    try
+        //    {
+        //        CreatePaymentResponse response = client.WithNewMerchant(MerchantId).Payments.CreatePayment(createPaymentRequest).GetAwaiter().GetResult();
+        //        return response;
+        //    }
+        //    catch (IdempotenceException e)
+        //    {
+        //        // A request with the same idempotenceKey is still in progress, try again after a short pause
+        //        // e.IdempotenceRequestTimestamp contains the value of the
+        //        // X-GCS-Idempotence-Request-Timestamp header
+        //    }
+        //    finally
+        //    {
+        //        long? idempotenceRequestTimestamp = context.IdempotenceRequestTimestamp;
+        //        // idempotenceRequestTimestamp contains the value of the
+        //        // X-GCS-Idempotence-Request-Timestamp header
+        //        // if idempotenceRequestTimestamp is not null this was not the first request
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public CreatePaymentRequest GetTestCreatePaymentRequest()
         {
             Card card = new Card();
-            card.CardNumber = "4567350000427977";
+            card.CardNumber = "5137009801943438";
             card.CardholderName = "Wile E. Coyote";
             card.Cvv = "123";
             card.ExpiryDate = "1299";
 
-            AmountOfMoney authenticationAmount = new AmountOfMoney();
-            authenticationAmount.Amount = 2980L;
-            authenticationAmount.CurrencyCode = "EUR";
+            //AmountOfMoney authenticationAmount = new AmountOfMoney();
+            //authenticationAmount.Amount = 20L * 100;
+            //authenticationAmount.CurrencyCode = "EUR";
 
             RedirectionData redirectionData = new RedirectionData();
             redirectionData.ReturnUrl = "https://hostname.myownwebsite.url";
 
-            ThreeDSecure threeDSecure = new ThreeDSecure();
-            //threeDSecure.AuthenticationAmount = authenticationAmount;
-            //threeDSecure.AuthenticationFlow = "browser";
-            threeDSecure.ChallengeCanvasSize = "600x400";
-            threeDSecure.ChallengeIndicator = "challenge-requested";
-            threeDSecure.ExemptionRequest = "none";
-            threeDSecure.RedirectionData = redirectionData;
-            threeDSecure.SkipAuthentication = true;
+            //ThreeDSecure threeDSecure = new ThreeDSecure();
+            ////threeDSecure.AuthenticationAmount = authenticationAmount;
+            ////threeDSecure.AuthenticationFlow = "browser";
+            //threeDSecure.ChallengeCanvasSize = "600x400";
+            //threeDSecure.ChallengeIndicator = "challenge-requested";
+            //threeDSecure.ExemptionRequest = "none";
+            //threeDSecure.RedirectionData = redirectionData;
+            //threeDSecure.SkipAuthentication = true;
 
             CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
             cardPaymentMethodSpecificInput.Card = card;
             cardPaymentMethodSpecificInput.IsRecurring = false;
             //cardPaymentMethodSpecificInput.MerchantInitiatedReasonIndicator = "delayedCharges";
-            cardPaymentMethodSpecificInput.PaymentProductId = 1;
+            cardPaymentMethodSpecificInput.PaymentProductId = 3;
+            cardPaymentMethodSpecificInput.AuthorizationMode = "SALE";
 
             //disabled 3d
             //cardPaymentMethodSpecificInput.ThreeDSecure = threeDSecure;
@@ -113,7 +112,7 @@ namespace shu_bike_shop
             cardPaymentMethodSpecificInput.TransactionChannel = "ECOMMERCE";
 
             AmountOfMoney amountOfMoney = new AmountOfMoney();
-            amountOfMoney.Amount = 2980L;
+            amountOfMoney.Amount = 20L * 100;
             amountOfMoney.CurrencyCode = "EUR";
 
             Address billingAddress = new Address();
@@ -146,7 +145,7 @@ namespace shu_bike_shop
             device.Locale = "en-US";
             device.TimezoneOffsetUtcMinutes = "420";
             device.UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Safari/605.1.15";
-            
+
             PersonalName name = new PersonalName();
             name.FirstName = "Wile";
             name.Surname = "Coyote";
@@ -196,7 +195,7 @@ namespace shu_bike_shop
             IList<LineItem> items = new List<LineItem>();
 
             AmountOfMoney item1AmountOfMoney = new AmountOfMoney();
-            item1AmountOfMoney.Amount = 2500L;
+            item1AmountOfMoney.Amount = 2500L * 100;
             item1AmountOfMoney.CurrencyCode = "EUR";
 
             LineItemInvoiceData item1InvoiceData = new LineItemInvoiceData();
@@ -211,7 +210,7 @@ namespace shu_bike_shop
             items.Add(item1);
 
             AmountOfMoney item2AmountOfMoney = new AmountOfMoney();
-            item2AmountOfMoney.Amount = 480L;
+            item2AmountOfMoney.Amount = 480L * 100;
             item2AmountOfMoney.CurrencyCode = "EUR";
 
             LineItemInvoiceData item2InvoiceData = new LineItemInvoiceData();
@@ -228,10 +227,10 @@ namespace shu_bike_shop
 
             Order order = new Order();
             order.AmountOfMoney = amountOfMoney;
-            order.Customer = customer;
-            order.References = references;
-            order.Shipping = shipping;
-            order.ShoppingCart = shoppingCart;
+            //order.Customer = customer;
+            //order.References = references;
+            //order.Shipping = shipping;
+            //order.ShoppingCart = shoppingCart;
 
             CreatePaymentRequest body = new CreatePaymentRequest();
             //body.CardPaymentMethodSpecificInput.ThreeDSecure.SkipAuthentication 
@@ -240,6 +239,5 @@ namespace shu_bike_shop
 
             return body;
         }
-
     }
 }

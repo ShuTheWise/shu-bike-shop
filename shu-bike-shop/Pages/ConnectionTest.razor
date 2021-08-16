@@ -1,9 +1,8 @@
 ﻿@page "/connectionTest"
 
-@using Ingenico.Direct.Sdk
+@using PaymentAccessService;
 @inject IPaymentService paymentService
 <h1>Merchant test</h1>
-
 <div>
     Merchant: @paymentService.MerchantId
 </div>
@@ -17,14 +16,15 @@
 @if (connectionTestResult == "OK")
 {
     <button class="btn btn-primary" @onclick="CreateTestPayment">Place order</button>
-
     @if (testPaymentPerformed)
     {
         <div>
             Test payment result:
         </div>
         <div>
-            @testPaymentResult
+            <textarea class="textarea" 
+                      @bind-value="testPaymentResult"
+                      @bind-value:event="oninput" />
         </div>
     }
 }
@@ -39,6 +39,7 @@
     {
         try
         {
+            testPaymentPerformed = false;
             var testConnection = await paymentService.TestConnection();
             connectionTestResult = testConnection.Result;
         }
@@ -56,24 +57,7 @@
         try
         {
             var paymentResponse = await paymentService.CreateTestPayment();
-            testPaymentResult = paymentResponse.ToString();
-        }
-        catch (ValidationException e)
-        {
-            System.Console.Out.WriteLine("Input validation error:");
-            foreach (var error in e.Errors)
-            {
-                string str = "";
-                if (error.PropertyName == null)
-                {
-                    str = string.Format("- {0}: {1}", error.Code, error.Message);
-                }
-                else
-                {
-                    str = string.Format("- {0}: {1}: {2}", error.PropertyName, error.Code, error.Message);
-                }
-                testPaymentResult += $"\n{str}";
-            }
+            testPaymentResult = paymentResponse.ToJson();
         }
         catch (Exception ex)
         {

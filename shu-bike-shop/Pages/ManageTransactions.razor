@@ -3,12 +3,8 @@
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
 
-@inject IOrderData orderData
-@inject IPaymentService paymentService
 @inject ITransactionsData transactionData
 @inject IJSRuntime jSRuntime
-@inject ISecurityService securityService
-@inject NavigationManager navigationManager
 
 <AuthorizeView Roles="Administrators">
     <Authorized>

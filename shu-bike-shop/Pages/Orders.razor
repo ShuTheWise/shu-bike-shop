@@ -1,5 +1,6 @@
 ﻿@page "/orders"
 
+@using PaymentAccessService
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
 
@@ -60,7 +61,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        user = securityService.CurrentUser;
+        user = await securityService.GetCurrentUser();
         await RefreshOrders();
     }
 

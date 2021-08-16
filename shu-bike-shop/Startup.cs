@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using Npgsql;
 using DataAccessLibrary;
+using PaymentAccessService;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace shu_bike_shop

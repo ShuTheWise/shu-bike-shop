@@ -43,7 +43,7 @@ else
         Total amount: @totalAmount
     </div>
     <button class="btn btn-primary" disabled="@BuyingDisabled" @onclick="()=>PlaceOrder()">Place order</button>
-    @if (!canPlaceOrder)
+    @if (!CanPlaceOrder)
     {
         <div>
             <small>
@@ -54,23 +54,23 @@ else
 }
 
 @code {
-    private bool canPlaceOrder { get; set; }
+    private User user;
+    private bool CanPlaceOrder => user != null && user.CanPlaceOrder;
+    private bool BuyingDisabled => !CanPlaceOrder;
 
     private decimal totalAmount;
     private List<BasketItemModel> basketItems;
 
     protected override async Task OnInitializedAsync()
     {
-        var user = securityService.CurrentUser;
-        canPlaceOrder = user != null && user.CanPlaceOrder;
-
+        user = await securityService.GetCurrentUser();
         basketItems = await basketService.GetBasketItems();
         RefreshTotalAmount();
     }
 
     private async Task PlaceOrder()
     {
-        var user = securityService.CurrentUser;
+        user = await securityService.GetCurrentUser();
 
         var orderModel = await orderData.AddOrder(new OrderCreateModel()
         {
@@ -103,6 +103,4 @@ else
             totalAmount += item.Price;
         }
     }
-
-    private bool BuyingDisabled => !canPlaceOrder;
 }

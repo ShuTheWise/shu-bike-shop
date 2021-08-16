@@ -1,18 +1,4 @@
 ﻿@page "/"
-@inject IUserService userService
-@inject ISecurityService securitySerivce
 
+<img src="images/logo.png" />
 <h1>Welcome to Shu Bike Shop!</h1>
-
-@code{
-    private string name;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var user = securitySerivce.CurrentUser;
-        if (user != null)
-        {
-            await userService.AssignRole(name);
-        }
-    }
-}
