@@ -7,6 +7,7 @@ namespace PaymentAccessService
     {
         Task<TestConnection> TestConnection();
         Task<CreatePaymentResponse> CreateTestPayment();
+        Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest);
 
         string MerchantId { get; }
     }

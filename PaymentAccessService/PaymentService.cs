@@ -29,7 +29,7 @@ namespace PaymentAccessService
             var client = GetClient();
             var body = GetTestCreatePaymentRequest();
             //CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
-            
+
             return client.WithNewMerchant(MerchantId).Payments.CreatePayment(body);
             //return GetClient().WithNewMerchant(MerchantId).Services.TestConnection();
         }
@@ -49,31 +49,30 @@ namespace PaymentAccessService
             return Factory.CreateClient(communicatorConfiguration);
         }
 
-        //public CreatePaymentResponse CreatePayment(CreatePaymentRequest createPaymentRequest)
-        //{
-        //    var client = GetClient();
-        //    CallContext context = new CallContext().WithIdempotenceKey(idempotenceKey);
-        //    try
-        //    {
-        //        CreatePaymentResponse response = client.WithNewMerchant(MerchantId).Payments.CreatePayment(createPaymentRequest).GetAwaiter().GetResult();
-        //        return response;
-        //    }
-        //    catch (IdempotenceException e)
-        //    {
-        //        // A request with the same idempotenceKey is still in progress, try again after a short pause
-        //        // e.IdempotenceRequestTimestamp contains the value of the
-        //        // X-GCS-Idempotence-Request-Timestamp header
-        //    }
-        //    finally
-        //    {
-        //        long? idempotenceRequestTimestamp = context.IdempotenceRequestTimestamp;
-        //        // idempotenceRequestTimestamp contains the value of the
-        //        // X-GCS-Idempotence-Request-Timestamp header
-        //        // if idempotenceRequestTimestamp is not null this was not the first request
-        //    }
+        public Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest)
+        {
+            var client = GetClient();
+            CallContext context = new CallContext().WithIdempotenceKey(createPaymentRequest.GetHashCode().ToString());
+            try
+            {
+                return client.WithNewMerchant(MerchantId).Payments.CreatePayment(createPaymentRequest);
+            }
+            catch (IdempotenceException e)
+            {
+                // A request with the same idempotenceKey is still in progress, try again after a short pause
+                // e.IdempotenceRequestTimestamp contains the value of the
+                // X-GCS-Idempotence-Request-Timestamp header
+            }
+            finally
+            {
+                long? idempotenceRequestTimestamp = context.IdempotenceRequestTimestamp;
+                // idempotenceRequestTimestamp contains the value of the
+                // X-GCS-Idempotence-Request-Timestamp header
+                // if idempotenceRequestTimestamp is not null this was not the first request
+            }
 
-        //    return null;
-        //}
+            return null;
+        }
 
         public CreatePaymentRequest GetTestCreatePaymentRequest()
         {
