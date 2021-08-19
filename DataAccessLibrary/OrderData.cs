@@ -59,5 +59,11 @@ namespace DataAccessLibrary
             string sql = @"update orders set orderStatus = @OrderStatus, paymentstatus = @PaymentStatus where id = @Id";
             await db.SaveData(sql, orderModel);
         }
+
+        public Task<OrderModel> GetOrder(int id, string userEmail)
+        {
+            string sql = @"select * from orders where id = @id and useremail = @userEmail";
+            return db.LoadSingle<OrderModel, dynamic>(sql, new { userEmail, id });
+        }
     }
 }

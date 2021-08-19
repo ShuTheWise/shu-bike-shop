@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shu-bike-shop", "shu-bike-s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{244F863E-3336-4B3F-976F-B482423FC68B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentAccessService", "PaymentAccessService\PaymentAccessService.csproj", "{D3153141-00A7-4209-B011-420A2476B039}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentAccessService", "PaymentAccessService\PaymentAccessService.csproj", "{D3153141-00A7-4209-B011-420A2476B039}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

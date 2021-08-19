@@ -7,9 +7,6 @@ namespace shu_bike_shop
     {
         public static string ToJson(this object o, bool pretty = true)
         {
-            return JsonConvert.SerializeObject(
-  o, Formatting.Indented,  new JsonConverter[] { new StringEnumConverter() });
-
             return JsonConvert.SerializeObject(o, pretty ? Formatting.Indented : Formatting.None);
         }
     }

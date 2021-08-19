@@ -13,7 +13,7 @@
     <Authorized>
         @if (orders == null)
         {
-            <p><em>Loading...</em></p>
+            <Loading></Loading>
         }
         else if (!orders.Any())
         {
@@ -35,32 +35,32 @@
                 <tbody>
                     @foreach (var order in orders)
                     {
-                    <tr>
-                        <td>@order.Id</td>
-                        <td>@order.UserEmail</td>
-                        <td>@order.TotalAmount</td>
-                        <td>
-                            <select @bind="@order.OrderStatus">
-                                @foreach (var item in Enum.GetValues(typeof(OrderStatus)))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <select @bind="order.PaymentStatus">
-                                @foreach (var item in Enum.GetValues(typeof(PaymentStatus)))
-                                {
-                                    <option value="@item">@item</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-primary" @onclick="()=>UpdateOrder(order)">
-                                <span class="oi oi-check"></span> Apply
-                            </button>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.UserEmail</td>
+                            <td>@order.TotalAmount</td>
+                            <td>
+                                <select @bind="@order.OrderStatus">
+                                    @foreach (var item in Enum.GetValues(typeof(OrderStatus)))
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select @bind="order.PaymentStatus">
+                                    @foreach (var item in Enum.GetValues(typeof(PaymentStatus)))
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="()=>UpdateOrder(order)">
+                                    <span class="oi oi-check"></span> Apply
+                                </button>
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>

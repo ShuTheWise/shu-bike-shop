@@ -12,8 +12,6 @@ namespace PaymentAccessService
         public string MerchantId => "lkaMerchantWebshopTest";
 
         private readonly IConfiguration config;
-        //private string idempotenceKey = Guid.NewGuid().ToString();
-
         public PaymentService(IConfiguration config)
         {
             this.config = config;

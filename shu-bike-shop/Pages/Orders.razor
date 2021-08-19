@@ -15,7 +15,7 @@
     <Authorized>
         @if (orders == null)
         {
-            <p><em>Loading...</em></p>
+            <Loading></Loading>
         }
         else if (!orders.Any())
         {
@@ -41,11 +41,10 @@
                             <td>@order.PaymentStatus</td>
                             <td>@order.TotalAmount</td>
                             <td>
-                                <button class="btn btn-primary" disabled="@IsPaid(order)" @onclick="() => PayForOrder(order)">
-                                    <span class="oi oi-dollar"> Pay</span>
+                                <button class="btn btn-dark" @onclick="()=> GoToOrder(order)">
+                                    <span class="oi oi-project" aria-hidden="true"></span> Order details
                                 </button>
                             </td>
-
                         </tr>
                     }
                 </tbody>
@@ -62,50 +61,19 @@
     protected override async Task OnInitializedAsync()
     {
         user = await securityService.GetCurrentUser();
-        await RefreshOrders();
-    }
-
-    private async Task RefreshOrders()
-    {
         if (user != null)
         {
             orders = await orderData.GetOrders(user.Name);
         }
     }
 
-    private bool IsPaid(OrderModel order) => order.PaymentStatus == PaymentStatus.Paid;
-
-    private async Task PayForOrder(OrderModel orderModel)
+    private void GoToOrder(OrderModel orderModel)
     {
-        if (user == null)
-        {
-            return;
-        }
+        navigationManager.NavigateTo($"orders/{orderModel.Id}");
+    }
 
-        var add = await jSRuntime.Confirm($"Pay for order ?");
-
-        if (add)
-        {
-            try
-            {
-                await transactionData.AddTransaction(new TransactionCreateModel()
-                {
-                    Username = user.Name,
-                    OrderId = orderModel.Id,
-                    Amount = orderModel.TotalAmount,
-                    PaymentMethod = PaymentMethod.Visa
-                });
-
-                await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
-
-                await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
-
-                await RefreshOrders();
-            }
-            catch
-            {
-
-            }
-        }
+    private string OrderLink(OrderModel orderModel)
+    {
+        return $"orders/{orderModel.Id}";
     }
 }

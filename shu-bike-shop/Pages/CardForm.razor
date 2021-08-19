@@ -1,0 +1,153 @@
+﻿@using Ingenico.Direct.Sdk.Domain;
+@using System.Text.RegularExpressions
+
+<form class="credit-card">
+    <div class="form-header">
+        <h4 class="title">Credit card detail</h4>
+    </div>
+
+    <div class="form-body">
+        <EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <input type="text" class="card-number" placeholder="Card Holder" @bind-value="card.CardholderName">
+            <!-- Card Number -->
+            <input type="text" class="card-number" placeholder="Card Number" @bind-value="card.CardNumber">
+            @*<InputText @bind-value="card.CardNumber"/>*@
+
+            <!-- Date Field -->
+            <div class="date-field">
+                <div class="month">
+                    <select name="Month" @bind="@month">
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                <div class="year">
+                    <select name="Year" @bind="@year">
+                        @for (int i = 2021; i < 2050; i++)
+                        {
+                            <option value="@i.ToString().Substring(2)">@i</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card Verification Field -->
+            <div class="card-verification">
+                <div class="cvv-input">
+                    <input type="text" placeholder="CVV" @bind-value="@card.Cvv">
+                </div>
+                <div class="cvv-details">
+                    <p>3 or 4 digits usually found <br> on the signature strip</p>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="proceed-btn">Proceed</button>
+        </EditForm>
+    </div>
+</form>
+
+@code {
+
+    public delegate Task SubmitDelegate(Card card);
+
+    [Parameter]
+    public SubmitDelegate OnValidSubmit { get; set; }
+
+    private Card card = new Card();
+    private EditContext editContext;
+    private ValidationMessageStore messageStore;
+
+    private string month = "01";
+    private string year = "21";
+
+    protected override void OnInitialized()
+    {
+        editContext = new(card);
+        editContext.OnValidationRequested += HandleValidationRequested;
+        messageStore = new(editContext);
+    }
+
+    private void HandleValidationRequested(object sender, ValidationRequestedEventArgs args)
+    {
+        messageStore.Clear();
+
+        card.ExpiryDate = month + year;
+
+        if (string.IsNullOrEmpty(card.CardholderName))
+        {
+            messageStore.Add(() => card.CardNumber, "Invalid card holder");
+        }
+
+        if (!ValidateCreditCardNumber(card.CardNumber))
+        {
+            messageStore.Add(() => card.CardNumber, "Invalid card number");
+        }
+
+        if (!ValidateCvv(card.Cvv))
+        {
+            messageStore.Add(() => card.ExpiryDate, "Invalid cvv");
+        }
+    }
+
+    public static bool ValidateCvv(string cvv)
+    {
+        if (string.IsNullOrEmpty(cvv))
+        {
+            return false;
+        }
+
+        var cvvCheck = new Regex(@"^\d{3}$");
+
+        if (!cvvCheck.IsMatch(cvv))
+        {
+            // <2>check cvv is valid as "999"
+            return false;
+        }
+
+        return true;
+    }
+
+    public static bool ValidateCreditCardNumber(string cardNo)
+    {
+        if (string.IsNullOrEmpty(cardNo))
+        {
+            return false;
+        }
+
+        var cardCheck = new Regex(@"(^4[0-9]{12}(?:[0-9]{3})?$)|(^(?:5[1-5][0-9]{2}|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2}|27[01][0-9]|2720)[0-9]{12}$)|(3[47][0-9]{13})|(^3(?:0[0-5]|[68][0-9])[0-9]{11}$)|(^6(?:011|5[0-9]{2})[0-9]{12}$)|(^(?:2131|1800|35\d{3})\d{11}$)");
+
+        if (!cardCheck.IsMatch(cardNo))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnValidSubmit != null)
+        {
+            await OnValidSubmit(card);
+        }
+    }
+
+    public void Dispose()
+    {
+        editContext.OnValidationRequested -= HandleValidationRequested;
+    }
+}

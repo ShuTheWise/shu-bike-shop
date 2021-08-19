@@ -32,33 +32,33 @@
                     <tbody>
                         @foreach (var bike in bikes)
                         {
-                        <tr>
-                            <td>
-                                <input class="form-group mx-sm-1 mb-1" type="text" @bind="@bike.Make" />
-                            </td>
-                            <td>
-                                <input class="form-group" type="text" @bind="@bike.Model" />
-                            </td>
-                            <td>
-                                <input class="form-group" type="number" @bind="@bike.Year" />
-                            </td>
-                            <td>
-                                <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Price" />
-                            </td>
-                            <td>
-                                <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Amount" />
-                            </td>
-                            <td>
-                                <button class="btn btn-primary" @onclick="()=>UpdateBike(bike)">
-                                    <span class="oi oi-check"></span> Apply
-                                </button>
-                            </td>
-                            <td>
-                                <button class="btn btn-primary" @onclick="()=>DeleteBike(bike)">
-                                    <span class="oi oi-delete"></span> Delete
-                                </button>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                    <input class="form-group mx-sm-1 mb-1" type="text" @bind="@bike.Make" />
+                                </td>
+                                <td>
+                                    <input class="form-group" type="text" @bind="@bike.Model" />
+                                </td>
+                                <td>
+                                    <input class="form-group" type="number" @bind="@bike.Year" />
+                                </td>
+                                <td>
+                                    <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Price" />
+                                </td>
+                                <td>
+                                    <input class="form-group mx-sm-1 mb-1" type="number" @bind="@bike.Amount" />
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="()=>UpdateBike(bike)">
+                                        <span class="oi oi-check"></span> Apply
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="()=>DeleteBike(bike)">
+                                        <span class="oi oi-delete"></span> Delete
+                                    </button>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>

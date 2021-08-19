@@ -1,0 +1,159 @@
+﻿@page "/orders/{Id:int}"
+
+@using DataAccessLibrary.Models
+@using DataAccessLibrary
+@using PaymentAccessService
+@using Ingenico.Direct.Sdk.Domain;
+
+@inject IOrderData orderData
+@inject ISecurityService securityService
+@inject IPaymentService paymentService
+@inject ITransactionsData transactionData
+@inject IJSRuntime jSRuntime
+@inject ISecurityService securityService
+@inject NavigationManager navigationManager
+
+@if (loaded)
+{
+    <p><em>"There is nothing here..."</em></p>
+}
+else
+{
+    <Loading></Loading>
+}
+
+@if (orderModel != null)
+{
+    <h1>
+        Order details
+    </h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>Order Number</td>
+                <td>@orderModel.Id</td>
+            </tr>
+            <tr>
+                <td>OrderStatus</td>
+                <td>@orderModel.OrderStatus</td>
+            </tr>
+            <tr>
+                <td>Payment status</td>
+                <td>@orderModel.PaymentStatus</td>
+            </tr>
+            <tr>
+                <td>Total amount</td>
+                <td>@orderModel.TotalAmount</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <select name="Month" @bind="ProductId" pl>
+        <option value="">Select payment method</option>
+        <option value="1">Visa</option>
+        <option value="3">MasterCard</option>
+    </select>
+
+    @if (ProductId.HasValue)
+    {
+        <CardForm OnValidSubmit="@Pay"></CardForm>
+    }
+}
+
+@code{
+    private User user;
+    private bool IsPaid(OrderModel order) => order.PaymentStatus == PaymentStatus.Paid;
+
+    public OrderModel orderModel;
+    private bool loaded;
+
+    [Parameter]
+    public int? Id { get; set; }
+    public int? ProductId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await securityService.GetCurrentUser();
+        await RefreshOrder();
+    }
+
+    private async Task Pay(Card card)
+    {
+        var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+
+        var order = new Order()
+        {
+            AmountOfMoney = new AmountOfMoney()
+            {
+                Amount = amountOfMoney,
+                CurrencyCode = "EUR"
+            }
+        };
+
+        var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
+        {
+            PaymentProductId = ProductId,
+            Card = card
+        };
+
+        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
+        {
+            CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput,
+            Order = order
+        };
+
+        var response = await paymentService.CreatePayment(createPaymentRequest);
+    }
+
+    private async Task RefreshOrder()
+    {
+        loaded = false;
+
+        if (user != null && Id.HasValue)
+        {
+            orderModel = await orderData.GetOrder(Id.Value, user.Name);
+        }
+
+        loaded = true;
+    }
+
+    private async Task PayForOrder(OrderModel orderModel)
+    {
+        if (user == null)
+        {
+            return;
+        }
+
+        var add = await jSRuntime.Confirm($"Pay for order ?");
+
+        if (add)
+        {
+            try
+            {
+                await transactionData.AddTransaction(new TransactionCreateModel()
+                {
+                    Username = user.Name,
+                    OrderId = orderModel.Id,
+                    Amount = orderModel.TotalAmount,
+                    PaymentMethod = PaymentMethod.Visa
+                });
+
+                var request = new CreatePaymentRequest();
+
+                //await paymentService.CreatePayment(req);
+
+                await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
+                await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
+
+                //navigationManager.NavigateTo();
+
+                await RefreshOrder();
+            }
+            catch
+            {
+
+            }
+        }
+    }
+}
