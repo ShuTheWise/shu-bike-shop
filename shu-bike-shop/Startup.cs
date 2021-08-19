@@ -11,11 +11,15 @@ using Npgsql;
 using DataAccessLibrary;
 using PaymentAccessService;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace shu_bike_shop
 {
     public class Startup
     {
+        readonly string Origins = "Origins";
+
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -54,6 +58,15 @@ namespace shu_bike_shop
             services.AddTransient<ISecurityService, SecurityService>();
 
             services.AddSingleton<IBasketService, BasketService>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: Origins,
+                builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,6 +98,8 @@ namespace shu_bike_shop
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            app.UseCors(Origins);
         }
 
         private string GetConnectionString()
