@@ -11,9 +11,9 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <input type="text" class="card-number" placeholder="Card Holder" @bind-value="card.CardholderName">
+            <input type="text" class="card-number" placeholder="@card.CardholderName" @bind-value="card.CardholderName">
             <!-- Card Number -->
-            <input type="text" class="card-number" placeholder="Card Number" @bind-value="card.CardNumber">
+            <input type="text" class="card-number" placeholder="@card.CardNumber" @bind-value="card.CardNumber">
             @*<InputText @bind-value="card.CardNumber"/>*@
 
             <!-- Date Field -->
@@ -30,7 +30,7 @@
                         <option value="08">August</option>
                         <option value="09">September</option>
                         <option value="10">October</option>
-                        <option value="11">November</option>
+                        <option value="11" selected="selected">November</option>
                         <option value="12">December</option>
                     </select>
                 </div>
@@ -47,7 +47,7 @@
             <!-- Card Verification Field -->
             <div class="card-verification">
                 <div class="cvv-input">
-                    <input type="text" placeholder="CVV" @bind-value="@card.Cvv">
+                    <input type="text" placeholder="@card.Cvv" @bind-value="@card.Cvv">
                 </div>
                 <div class="cvv-details">
                     <p>3 or 4 digits usually found <br> on the signature strip</p>
@@ -55,23 +55,37 @@
             </div>
 
             <!-- Buttons -->
-            <button type="submit" class="proceed-btn">Proceed</button>
+            @if (isProcessing)
+            {
+                <Loading></Loading>
+            }
+            else
+            {
+                <button type="submit" class="proceed-btn">Proceed</button>
+            }
         </EditForm>
     </div>
 </form>
 
 @code {
-
+    public bool isProcessing;
     public delegate Task SubmitDelegate(Card card);
 
     [Parameter]
     public SubmitDelegate OnValidSubmit { get; set; }
 
-    private Card card = new Card();
+    private Card card = new Card
+    {
+        CardholderName = "Willow Ebert",
+        CardNumber = "4929939366999414",
+        Cvv = "904",
+        ExpiryDate = "1121"
+    };
+
     private EditContext editContext;
     private ValidationMessageStore messageStore;
 
-    private string month = "01";
+    private string month = "11";
     private string year = "21";
 
     protected override void OnInitialized()
@@ -90,6 +104,11 @@
         if (string.IsNullOrEmpty(card.CardholderName))
         {
             messageStore.Add(() => card.CardNumber, "Invalid card holder");
+        }
+
+        if (!ValidateExpiryDate())
+        {
+            messageStore.Add(() => card.CardNumber, "Invalid expiry date");
         }
 
         if (!ValidateCreditCardNumber(card.CardNumber))
@@ -142,8 +161,32 @@
     {
         if (OnValidSubmit != null)
         {
+            isProcessing = true;
+            this.StateHasChanged();
+
             await OnValidSubmit(card);
+
+            isProcessing = false;
+            this.StateHasChanged();
         }
+    }
+
+    public bool ValidateExpiryDate()
+    {
+        if (year != "21")
+        {
+            return true;
+        }
+
+        if (int.TryParse(month, out int m))
+        {
+            if (m < DateTime.Now.Month)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void Dispose()

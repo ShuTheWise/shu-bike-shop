@@ -13,21 +13,41 @@
 @inject ISecurityService securityService
 @inject NavigationManager navigationManager
 
-@if (loaded)
+
+<h1>
+    Order details
+</h1>
+
+<select name="Month" @bind="ProductId">
+    <option value="1">Visa</option>
+    <option value="3">MasterCard</option>
+</select>
+
+<select name="Month" @bind="AuthorizationMode">
+    <option value="SALE">Sale</option>
+    <option value="PRE_AUTHORIZATION">Pre Authorization</option>
+    <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
+</select>
+<input type="checkbox" id="vehicle1" name="vehicle1" @bind-value="@IsRecurring">
+<label for="vehicle1">Recurring</label>
+
+
+@if (ProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
 {
-    <p><em>"There is nothing here..."</em></p>
+    <CardForm OnValidSubmit="@Pay"></CardForm>
 }
-else
+
+@if (!loaded)
 {
     <Loading></Loading>
+}
+else if (orderModel == null)
+{
+    <p><em>"There is nothing here..."</em></p>
 }
 
 @if (orderModel != null)
 {
-    <h1>
-        Order details
-    </h1>
-
     <table class="table">
         <tbody>
             <tr>
@@ -48,17 +68,6 @@ else
             </tr>
         </tbody>
     </table>
-
-    <select name="Month" @bind="ProductId" pl>
-        <option value="">Select payment method</option>
-        <option value="1">Visa</option>
-        <option value="3">MasterCard</option>
-    </select>
-
-    @if (ProductId.HasValue)
-    {
-        <CardForm OnValidSubmit="@Pay"></CardForm>
-    }
 }
 
 @code{
@@ -70,7 +79,10 @@ else
 
     [Parameter]
     public int? Id { get; set; }
-    public int? ProductId { get; set; }
+    public int? ProductId { get; set; } = 1;
+
+    public bool IsRecurring { get; set; }
+    public string AuthorizationMode { get; set; } = "SALE";
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,30 +92,41 @@ else
 
     private async Task Pay(Card card)
     {
-        var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
-
-        var order = new Order()
+        try
         {
-            AmountOfMoney = new AmountOfMoney()
+            var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+
+            var order = new Order()
             {
-                Amount = amountOfMoney,
-                CurrencyCode = "EUR"
-            }
-        };
+                AmountOfMoney = new AmountOfMoney()
+                {
+                    Amount = amountOfMoney,
+                    CurrencyCode = "EUR"
+                }
+            };
 
-        var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
+            var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
+            {
+                PaymentProductId = ProductId,
+                Card = card,
+                AuthorizationMode = AuthorizationMode,
+                IsRecurring = IsRecurring
+            };
+
+            CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
+            {
+                CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput,
+                Order = order,
+            };
+
+            var response = await paymentService.CreatePayment(createPaymentRequest);
+
+            await jSRuntime.Inform(response.ToJson());
+        }
+        catch (Exception ex)
         {
-            PaymentProductId = ProductId,
-            Card = card
-        };
-
-        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
-        {
-            CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput,
-            Order = order
-        };
-
-        var response = await paymentService.CreatePayment(createPaymentRequest);
+            await jSRuntime.Inform(ex.ToString());
+        }
     }
 
     private async Task RefreshOrder()
