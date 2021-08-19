@@ -3,6 +3,8 @@
     public class TransactionUpdateModel
     {
         public int Id { get; set; }
-        public PaymentMethod PaymentMethod { get; set; }
+        public string ErrorMessage { get; set; }
+        public string ResponseMessage { get; set; }
+        public string Status { get; set; }
     }
 }

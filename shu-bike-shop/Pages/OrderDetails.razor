@@ -18,7 +18,7 @@
     Order details
 </h1>
 
-<select name="Month" @bind="ProductId">
+<select name="Month" @bind="PaymentProductId">
     <option value="1">Visa</option>
     <option value="3">MasterCard</option>
 </select>
@@ -32,7 +32,7 @@
 <label for="vehicle1">Recurring</label>
 
 
-@if (ProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
+@if (PaymentProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
 {
     <CardForm OnValidSubmit="@Pay"></CardForm>
 }
@@ -79,7 +79,7 @@ else if (orderModel == null)
 
     [Parameter]
     public int? Id { get; set; }
-    public int? ProductId { get; set; } = 1;
+    public int? PaymentProductId { get; set; } = 1;
 
     public bool IsRecurring { get; set; }
     public string AuthorizationMode { get; set; } = "SALE";
@@ -92,6 +92,22 @@ else if (orderModel == null)
 
     private async Task Pay(Card card)
     {
+        var pay = await jSRuntime.Confirm($"Pay for order ?");
+
+        if (!pay)
+        {
+            return;
+        }
+
+        TransactionCreateModel transaction = new TransactionCreateModel
+        {
+            PaymentProductId = PaymentProductId.Value,
+            Amount = orderModel.TotalAmount,
+            Username = user.Name,
+            OrderId = orderModel.Id,
+            CardholderName = card.CardholderName
+        };
+
         try
         {
             var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
@@ -107,7 +123,7 @@ else if (orderModel == null)
 
             var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
             {
-                PaymentProductId = ProductId,
+                PaymentProductId = PaymentProductId,
                 Card = card,
                 AuthorizationMode = AuthorizationMode,
                 IsRecurring = IsRecurring
@@ -120,13 +136,20 @@ else if (orderModel == null)
             };
 
             var response = await paymentService.CreatePayment(createPaymentRequest);
-
-            await jSRuntime.Inform(response.ToJson());
+            var json = response.ToJson();
+            transaction.ResponseMessage = json;
+            transaction.Status = response.Payment.Status;
+            await jSRuntime.Inform(json);
         }
         catch (Exception ex)
         {
-            await jSRuntime.Inform(ex.ToString());
+            var error = ex.ToString();
+            transaction.ErrorMessage = error;
+            await jSRuntime.Inform(error);
         }
+
+        await transactionData.AddTransaction(transaction);
+        //await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
     }
 
     private async Task RefreshOrder()
@@ -148,35 +171,7 @@ else if (orderModel == null)
             return;
         }
 
-        var add = await jSRuntime.Confirm($"Pay for order ?");
-
-        if (add)
-        {
-            try
-            {
-                await transactionData.AddTransaction(new TransactionCreateModel()
-                {
-                    Username = user.Name,
-                    OrderId = orderModel.Id,
-                    Amount = orderModel.TotalAmount,
-                    PaymentMethod = PaymentMethod.Visa
-                });
-
-                var request = new CreatePaymentRequest();
-
-                //await paymentService.CreatePayment(req);
-
-                await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
-                await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
-
-                //navigationManager.NavigateTo();
-
-                await RefreshOrder();
-            }
-            catch
-            {
-
-            }
-        }
+        await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
+        await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
     }
 }

@@ -3,6 +3,7 @@
     public enum PaymentStatus
     {
         NotPaid,
+        ProcessingPayment,
         Paid,
         Error
     }
