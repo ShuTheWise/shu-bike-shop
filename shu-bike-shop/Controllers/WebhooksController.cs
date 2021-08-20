@@ -49,9 +49,9 @@ namespace shu_bike_shop.Controllers
                     try
                     {
                         await Task.Delay(3000);
-                        transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
                         i++;
-
+                        
+                        transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
                         break;
                     }
                     catch
