@@ -1,5 +1,6 @@
 ﻿using DataAccessLibrary.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DataAccessLibrary
@@ -54,10 +55,18 @@ namespace DataAccessLibrary
             return db.SaveData(sql, orderProductModel);
         }
 
-        public async Task UpdateOrder(OrderUpdateModel orderModel)
+        public async Task UpdateOrderByOrderId(int orderId, dynamic updateModel)
         {
-            string sql = @"update orders set orderStatus = @OrderStatus, paymentstatus = @PaymentStatus where id = @Id";
-            await db.SaveData(sql, orderModel);
+            object o = updateModel;
+            var set = string.Join(", ", o.GetType().GetProperties().Select(p => $"{p.Name} = @{p.Name}"));
+            string sql = $"update orders set {set} where id = '{orderId}'";
+            await db.SaveData(sql, updateModel);
+        }
+
+        public async Task UpdatePaymentStatus(int orderId, PaymentStatus status)
+        {
+            string sql = @"update orders set paymentstatus = @status where id = @orderid";
+            await db.SaveData(sql, new { orderId, status });
         }
 
         public Task<OrderModel> GetOrder(int id, string userEmail)

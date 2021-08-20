@@ -1,5 +1,6 @@
 ﻿using DataAccessLibrary.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DataAccessLibrary
@@ -7,15 +8,17 @@ namespace DataAccessLibrary
     public class TransactionsData : ITransactionsData
     {
         private readonly ISqlDataAccess db;
+        private readonly IOrderData orderData;
 
-        public TransactionsData(ISqlDataAccess db)
+        public TransactionsData(ISqlDataAccess db, IOrderData orderData)
         {
             this.db = db;
+            this.orderData = orderData;
         }
 
         public async Task<TransactionModel> AddTransaction(TransactionCreateModel model)
         {
-            string sql = @$"insert into transactions (amount, paymentproductid, username, cardholdername, orderid, errormessage, responsemessage, status) values (@Amount, @PaymentProductId, @Username, @CardholderName, @OrderId, @ErrorMessage, @ResponseMessage, @Status) returning id";
+            string sql = @$"insert into transactions (amount, paymentproductid, username, cardholdername, orderid, errormessage, responsemessage, status, paymentid) values (@Amount, @PaymentProductId, @Username, @CardholderName, @OrderId, @ErrorMessage, @ResponseMessage, @Status, @PaymentId) returning id";
 
             int transactionId = await db.SaveData<TransactionCreateModel, int>(sql, model);
 
@@ -28,7 +31,7 @@ namespace DataAccessLibrary
                 Username = model.Username,
                 CardholderName = model.CardholderName,
                 ErrorMessage = model.ErrorMessage,
-                ResponseMesssage = model.ResponseMessage
+                ResponseMessage = model.ResponseMessage
             };
         }
 
@@ -38,10 +41,18 @@ namespace DataAccessLibrary
             return db.LoadData<TransactionModel, dynamic>(sql, new { });
         }
 
-        public async Task UpdateTransaction(TransactionUpdateModel transactionModel)
+        public Task<TransactionModel> GetTransactionByPaymentId(int paymentId)
         {
-            string sql = @"update transactions set paymentMethod = @PaymentMethod where id = @Id";
-            await db.SaveData(sql, transactionModel);
+            string sql = "select * from transactions where paymentid = @paymentId";
+            return db.LoadSingle<TransactionModel, dynamic>(sql, new { paymentId });
+        }
+
+        public Task UpdateTransactionByPaymentId(int paymentId, dynamic updateModel)
+        {
+            object o = updateModel;
+            var set = string.Join(", ", o.GetType().GetProperties().Select(p => $"{p.Name} = @{p.Name}"));
+            string sql = $"update transactions set {set} where paymentid = '{paymentId}'";
+            return db.SaveData(sql, updateModel);
         }
     }
 }

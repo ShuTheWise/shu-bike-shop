@@ -32,7 +32,7 @@ namespace PaymentAccessService
             //return GetClient().WithNewMerchant(MerchantId).Services.TestConnection();
         }
 
-        private IClient GetClient()
+        public IClient GetClient()
         {
             var apiKeyId = config["API_KEY_ID"];
             var secretApiKey = config["SECRET_API_KEY"];

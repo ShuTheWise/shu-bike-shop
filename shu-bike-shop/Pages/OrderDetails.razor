@@ -139,6 +139,12 @@ else if (orderModel == null)
             var json = response.ToJson();
             transaction.ResponseMessage = json;
             transaction.Status = response.Payment.Status;
+
+            var paymentId = response.Payment.Id.Split('_');
+            transaction.PaymentId = int.Parse(paymentId[0]);
+            transaction.PaymentIdSuffix = int.Parse(paymentId[1]);
+
+            await orderData.UpdateOrderByOrderId(orderModel.Id, new { paymentstatus = PaymentStatus.ProcessingPayment });
             await jSRuntime.Inform(json);
         }
         catch (Exception ex)
@@ -149,7 +155,6 @@ else if (orderModel == null)
         }
 
         await transactionData.AddTransaction(transaction);
-        //await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
     }
 
     private async Task RefreshOrder()
@@ -171,7 +176,6 @@ else if (orderModel == null)
             return;
         }
 
-        await orderData.UpdateOrder(new OrderUpdateModel() { Id = orderModel.Id, OrderStatus = orderModel.OrderStatus, PaymentStatus = PaymentStatus.Paid });
         await jSRuntime.Inform($"Thank you for paying for order {orderModel.Id}");
     }
 }

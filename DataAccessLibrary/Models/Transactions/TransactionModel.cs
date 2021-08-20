@@ -9,6 +9,6 @@
         public string CardholderName { get; set; }
         public int OrderId { get; set; }
         public string ErrorMessage { get; set; }
-        public string ResponseMesssage { get; set; }
+        public string ResponseMessage { get; set; }
     }
 }

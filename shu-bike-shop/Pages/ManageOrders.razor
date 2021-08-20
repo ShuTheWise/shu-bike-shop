@@ -83,14 +83,13 @@
 
     private async Task UpdateOrder(OrderModel orderModel)
     {
-        var model = new OrderUpdateModel()
+        dynamic model = new
         {
-            Id = orderModel.Id,
-            OrderStatus = orderModel.OrderStatus,
-            PaymentStatus = orderModel.PaymentStatus
+            orderstatus = orderModel.OrderStatus,
+            paymentstatus = orderModel.PaymentStatus
         };
 
-        await orderData.UpdateOrder(model);
+        await orderData.UpdateOrderByOrderId(orderModel.Id, model);
 
         await RefreshOrders();
     }

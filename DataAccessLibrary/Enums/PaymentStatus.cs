@@ -4,6 +4,7 @@
     {
         NotPaid,
         ProcessingPayment,
+        WaitingForMerchant,
         Paid,
         Error
     }

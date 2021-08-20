@@ -10,5 +10,7 @@
         public string ErrorMessage { get; set; }
         public string ResponseMessage { get; set; }
         public string Status { get; set; }
+        public int PaymentId { get; set; }
+        public int PaymentIdSuffix { get; set; }
     }
 }
