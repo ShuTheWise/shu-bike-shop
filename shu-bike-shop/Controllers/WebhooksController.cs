@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Ingenico.Direct.Sdk.Domain;
 using DataAccessLibrary;
 using PaymentAccessService;
+using DataAccessLibrary.Models;
 
 namespace shu_bike_shop.Controllers
 {
@@ -31,7 +32,7 @@ namespace shu_bike_shop.Controllers
         {
             var payment = createPaymentResponse.Payment;
             string paymentId = createPaymentResponse.Payment.Id;
-            
+
             await logger.Log($"Received payment response {paymentId}, status {createPaymentResponse.Payment.StatusOutput.StatusCode}");
             try
             {
@@ -41,7 +42,26 @@ namespace shu_bike_shop.Controllers
                 var paymentIdPrefix = long.Parse(paymentIdSplit[0]);
                 var paymentIdSuffix = int.Parse(paymentIdSplit[1]);
 
-                var transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
+                TransactionModel transaction = null;
+                for (; ; )
+                {
+                    int i = 0;
+                    try
+                    {
+                        await Task.Delay(3000);
+                        transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
+                        i++;
+
+                        break;
+                    }
+                    catch
+                    {
+                        if (i > 5)
+                        {
+                            throw;
+                        }
+                    }
+                }
 
                 dynamic parameters = new
                 {
