@@ -13,28 +13,29 @@
 @inject ISecurityService securityService
 @inject NavigationManager navigationManager
 
-
 <h1>
     Order details
 </h1>
 
-<select name="Month" @bind="PaymentProductId">
-    <option value="1">Visa</option>
-    <option value="3">MasterCard</option>
-</select>
-
-<select name="Month" @bind="AuthorizationMode">
-    <option value="SALE">Sale</option>
-    <option value="PRE_AUTHORIZATION">Pre Authorization</option>
-    <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
-</select>
-<input type="checkbox" id="vehicle1" name="vehicle1" @bind-value="@IsRecurring">
-<label for="vehicle1">Recurring</label>
-
-
-@if (PaymentProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
+@if (orderModel != null && orderModel.PaymentStatus == PaymentStatus.NotPaid)
 {
-    <CardForm OnValidSubmit="@Pay"></CardForm>
+    <select name="Month" @bind="PaymentProductId">
+        <option value="1">Visa</option>
+        <option value="3">MasterCard</option>
+    </select>
+
+    <select name="Month" @bind="AuthorizationMode">
+        <option value="SALE">Sale</option>
+        <option value="PRE_AUTHORIZATION">Pre Authorization</option>
+        <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
+    </select>
+    <input type="checkbox" id="vehicle1" name="vehicle1" @bind-value="@IsRecurring">
+    <label for="vehicle1">Recurring</label>
+
+    @if (PaymentProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
+    {
+        <CardForm OnValidSubmit="@Pay"></CardForm>
+    }
 }
 
 @if (!loaded)
@@ -48,6 +49,7 @@ else if (orderModel == null)
 
 @if (orderModel != null)
 {
+    <br />
     <table class="table">
         <tbody>
             <tr>
@@ -108,6 +110,8 @@ else if (orderModel == null)
             CardholderName = card.CardholderName
         };
 
+        string message;
+
         try
         {
             var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
@@ -118,6 +122,10 @@ else if (orderModel == null)
                 {
                     Amount = amountOfMoney,
                     CurrencyCode = "EUR"
+                },
+                References = new OrderReferences()
+                {
+                    Descriptor = "test desciptor"
                 }
             };
 
@@ -143,18 +151,16 @@ else if (orderModel == null)
             var paymentId = response.Payment.Id.Split('_');
             transaction.PaymentId = long.Parse(paymentId[0]);
             transaction.PaymentIdSuffix = int.Parse(paymentId[1]);
-
-            await orderData.UpdateOrderByOrderId(orderModel.Id, new { paymentstatus = PaymentStatus.ProcessingPayment });
-            await jSRuntime.Inform(json);
+            message = json;
         }
         catch (Exception ex)
         {
-            var error = ex.ToString();
-            transaction.ErrorMessage = error;
-            await jSRuntime.Inform(error);
+            message = ex.ToString();
+            transaction.ErrorMessage = message;
         }
 
         await transactionData.AddTransaction(transaction);
+        await jSRuntime.Inform(message);
     }
 
     private async Task RefreshOrder()

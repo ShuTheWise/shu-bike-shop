@@ -74,5 +74,11 @@ namespace DataAccessLibrary
             string sql = @"select * from orders where id = @id and useremail = @userEmail";
             return db.LoadSingle<OrderModel, dynamic>(sql, new { userEmail, id });
         }
+
+        private Task<List<OrderProductModel>> GetOrderProducts(int orderId)
+        {
+            string sql = "select * from  orderproducts where orderid = @orderId";
+            return db.LoadData<OrderProductModel, dynamic>(sql, new { orderId });
+        }
     }
 }

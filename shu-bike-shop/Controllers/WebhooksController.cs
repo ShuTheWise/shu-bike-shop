@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
-using Ingenico.Direct.Sdk.Domain;
 using DataAccessLibrary;
 using PaymentAccessService;
 using DataAccessLibrary.Models;
+using System;
 
 namespace shu_bike_shop.Controllers
 {
@@ -12,6 +11,8 @@ namespace shu_bike_shop.Controllers
     [ApiController]
     public class WebhooksController : ControllerBase
     {
+        private const int retryCount = 3;
+
         private readonly ITransactionsData transactionsData;
         private readonly IReceivedCreatePaymentResponseData responsesData;
         private readonly IOrderData orderData;
@@ -28,44 +29,25 @@ namespace shu_bike_shop.Controllers
         }
 
         [HttpPost]
-        public async Task Post([FromBody] CreatePaymentResponse createPaymentResponse)
+        public async Task<IActionResult> Post([FromBody] PaymentModel paymentModel)
         {
-            var payment = createPaymentResponse.Payment;
-            string paymentId = createPaymentResponse.Payment.Id;
+            var payment = paymentModel.Payment;
+            string paymentId = $"request id: {paymentModel.Id}, payment id: {paymentModel.Payment.Id}";
 
-            await logger.Log($"Received payment response {paymentId}, status {createPaymentResponse.Payment.StatusOutput.StatusCode}");
+            await logger.Log($"Received payment response {paymentId} with status {paymentModel.Payment.StatusOutput.StatusCode}");
             try
             {
-                int responseId = await responsesData.AddResponse(createPaymentResponse.ToJson(false));
+                int responseId = await responsesData.AddResponse(paymentModel.ToJson(false));
 
                 var paymentIdSplit = payment.Id.Split('_');
                 var paymentIdPrefix = long.Parse(paymentIdSplit[0]);
                 var paymentIdSuffix = int.Parse(paymentIdSplit[1]);
 
-                TransactionModel transaction = null;
-                for (; ; )
-                {
-                    int i = 0;
-                    try
-                    {
-                        await Task.Delay(3000);
-                        i++;
-                        
-                        transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
-                        break;
-                    }
-                    catch
-                    {
-                        if (i > 5)
-                        {
-                            throw;
-                        }
-                    }
-                }
+                TransactionModel transaction = await GetTransaction(paymentId, paymentIdPrefix);
 
                 dynamic parameters = new
                 {
-                    status = createPaymentResponse.Payment.Status,
+                    status = paymentModel.Payment.Status,
                     orderid = transaction.OrderId,
                     paymentidsuffix = paymentIdSuffix
                 };
@@ -74,19 +56,14 @@ namespace shu_bike_shop.Controllers
 
                 PaymentStatus? status = null;
 
-                switch (createPaymentResponse.Payment.StatusOutput.StatusCode)
+                switch (paymentModel.Payment.StatusOutput.StatusCode)
                 {
+                    case 0:
+                        status = PaymentStatus.ProcessingPayment;
+                        break;
                     case 5:
-                        {
-                            status = PaymentStatus.WaitingForMerchant;
-                            //var body = new CapturePaymentRequest
-                            //{
-                            //    Amount = payment.PaymentOutput.AmountOfMoney.Amount,
-                            //    IsFinal = true
-                            //};
-                            //var captureResponse = await paymentService.GetMerchant().Payments.CapturePayment(payment.Id, body);
-                            break;
-                        }
+                        status = PaymentStatus.WaitingForMerchant;
+                        break;
                     case 9:
                     case 91:
                         status = PaymentStatus.Paid;
@@ -102,7 +79,35 @@ namespace shu_bike_shop.Controllers
             catch (Exception ex)
             {
                 await logger.Log($"Error processing payment response {paymentId}, {ex}");
+                return BadRequest();
             }
+            return Ok();
+        }
+
+        private async Task<TransactionModel> GetTransaction(string paymentId, long paymentIdPrefix)
+        {
+            TransactionModel transaction = null;
+            int i = 1;
+            for (; ; )
+            {
+                try
+                {
+                    transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
+                    break;
+                }
+                catch
+                {
+                    await logger.Log($"Could not get transaction for {paymentId} on try {i}");
+                    await Task.Delay(i * i * 1000);
+                    i++;
+                    if (i > 3)
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            return transaction;
         }
     }
 }
