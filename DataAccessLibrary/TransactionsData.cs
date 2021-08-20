@@ -41,13 +41,13 @@ namespace DataAccessLibrary
             return db.LoadData<TransactionModel, dynamic>(sql, new { });
         }
 
-        public Task<TransactionModel> GetTransactionByPaymentId(int paymentId)
+        public Task<TransactionModel> GetTransactionByPaymentId(long paymentId)
         {
             string sql = "select * from transactions where paymentid = @paymentId";
             return db.LoadSingle<TransactionModel, dynamic>(sql, new { paymentId });
         }
 
-        public Task UpdateTransactionByPaymentId(int paymentId, dynamic updateModel)
+        public Task UpdateTransactionByPaymentId(long paymentId, dynamic updateModel)
         {
             object o = updateModel;
             var set = string.Join(", ", o.GetType().GetProperties().Select(p => $"{p.Name} = @{p.Name}"));

@@ -38,7 +38,7 @@ namespace shu_bike_shop.Controllers
 
             var payment = createPaymentResponse.Payment;
             var paymentIdStr = payment.Id.Split('_');
-            var paymentId = int.Parse(paymentIdStr[0]);
+            var paymentId = long.Parse(paymentIdStr[0]);
             var paymentIdSuffix = int.Parse(paymentIdStr[1]);
 
             var transaction = await transactionsData.GetTransactionByPaymentId(paymentId);
@@ -65,7 +65,7 @@ namespace shu_bike_shop.Controllers
             else if (createPaymentResponse.Payment.StatusOutput.StatusCode == 91)
             {
                 ///
-
+                //paymentService.CreateTestPayment
             }
 
             //CaptureResponse response = client.merchant("merchantId").payments().capture("paymentId", body);

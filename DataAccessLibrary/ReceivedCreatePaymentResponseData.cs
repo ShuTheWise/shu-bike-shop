@@ -19,10 +19,10 @@ namespace DataAccessLibrary
             return db.LoadData<OrderModel, dynamic>(sql, new { });
         }
 
-        public async Task<int> AddResponse(string json)
+        public Task<int> AddResponse(string json)
         {
-            string sql = @$"insert into receivedcreatepaymentrespones (json) values (@json) returning id";
-            return await db.SaveData<string, int>(sql, json);
+            string sql = @$"insert into receivedcreatepaymentrespones (json) values (@Json) returning id";
+            return db.SaveData<dynamic,int>(sql, new { json });
         }
     }
 }

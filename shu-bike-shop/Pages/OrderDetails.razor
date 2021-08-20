@@ -141,7 +141,7 @@ else if (orderModel == null)
             transaction.Status = response.Payment.Status;
 
             var paymentId = response.Payment.Id.Split('_');
-            transaction.PaymentId = int.Parse(paymentId[0]);
+            transaction.PaymentId = long.Parse(paymentId[0]);
             transaction.PaymentIdSuffix = int.Parse(paymentId[1]);
 
             await orderData.UpdateOrderByOrderId(orderModel.Id, new { paymentstatus = PaymentStatus.ProcessingPayment });
