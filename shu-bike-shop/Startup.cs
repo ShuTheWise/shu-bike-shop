@@ -11,14 +11,12 @@ using Npgsql;
 using DataAccessLibrary;
 using PaymentAccessService;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Authorization;
 
 namespace shu_bike_shop
 {
     public class Startup
     {
-        readonly string Origins = "Origins";
-
+        private readonly string Origins = "Origins";
 
         public Startup(IConfiguration configuration)
         {
@@ -57,6 +55,8 @@ namespace shu_bike_shop
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<ISecurityService, SecurityService>();
+
+            services.AddTransient<ILogger, Logger>();
 
             services.AddSingleton<IBasketService, BasketService>();
 

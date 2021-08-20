@@ -1,5 +1,6 @@
 ﻿using Ingenico.Direct.Sdk;
 using Ingenico.Direct.Sdk.Domain;
+using Ingenico.Direct.Sdk.Merchant;
 using System.Threading.Tasks;
 
 namespace PaymentAccessService
@@ -9,7 +10,7 @@ namespace PaymentAccessService
         Task<TestConnection> TestConnection();
         Task<CreatePaymentResponse> CreateTestPayment();
         Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest);
-        IClient GetClient();
+        IMerchantClient GetMerchant();
 
         string MerchantId { get; }
     }

@@ -1,5 +1,6 @@
 ﻿using Ingenico.Direct.Sdk;
 using Ingenico.Direct.Sdk.Domain;
+using Ingenico.Direct.Sdk.Merchant;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace PaymentAccessService
             //return GetClient().WithNewMerchant(MerchantId).Services.TestConnection();
         }
 
-        public IClient GetClient()
+        private IClient GetClient()
         {
             var apiKeyId = config["API_KEY_ID"];
             var secretApiKey = config["SECRET_API_KEY"];
@@ -235,6 +236,11 @@ namespace PaymentAccessService
             body.Order = order;
 
             return body;
+        }
+
+        public IMerchantClient GetMerchant()
+        {
+            return GetClient().WithNewMerchant(MerchantId);
         }
     }
 }

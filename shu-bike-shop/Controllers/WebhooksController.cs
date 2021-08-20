@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Ingenico.Direct.Sdk;
 using Ingenico.Direct.Sdk.Domain;
 using DataAccessLibrary;
 using PaymentAccessService;
-using DataAccessLibrary.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace shu_bike_shop.Controllers
 {
@@ -17,62 +11,77 @@ namespace shu_bike_shop.Controllers
     [ApiController]
     public class WebhooksController : ControllerBase
     {
-        private ITransactionsData transactionsData;
-        private IReceivedCreatePaymentResponseData responsesData;
-        private IOrderData orderData;
-        private IPaymentService paymentService;
+        private readonly ITransactionsData transactionsData;
+        private readonly IReceivedCreatePaymentResponseData responsesData;
+        private readonly IOrderData orderData;
+        private readonly IPaymentService paymentService;
+        private readonly ILogger logger;
 
-        public WebhooksController(ITransactionsData transactionsData, IOrderData orderData, IReceivedCreatePaymentResponseData responsesData, IPaymentService paymentService)
+        public WebhooksController(ITransactionsData transactionsData, IOrderData orderData, IReceivedCreatePaymentResponseData responsesData, IPaymentService paymentService, ILogger logger)
         {
             this.transactionsData = transactionsData;
             this.orderData = orderData;
             this.responsesData = responsesData;
             this.paymentService = paymentService;
+            this.logger = logger;
         }
 
-        // POST api/<FooController>
         [HttpPost]
         public async Task Post([FromBody] CreatePaymentResponse createPaymentResponse)
         {
-            int responseId = await responsesData.AddResponse(createPaymentResponse.ToJson(false));
-
             var payment = createPaymentResponse.Payment;
-            var paymentIdStr = payment.Id.Split('_');
-            var paymentId = long.Parse(paymentIdStr[0]);
-            var paymentIdSuffix = int.Parse(paymentIdStr[1]);
-
-            var transaction = await transactionsData.GetTransactionByPaymentId(paymentId);
-
-            dynamic parameters = new
+            string paymentId = createPaymentResponse.Payment.Id;
+            
+            await logger.Log($"Received payment response {paymentId}, status {createPaymentResponse.Payment.StatusOutput.StatusCode}");
+            try
             {
-                status = createPaymentResponse.Payment.Status,
-                orderid = transaction.OrderId,
-                paymentidsuffix = paymentIdSuffix
-            };
+                int responseId = await responsesData.AddResponse(createPaymentResponse.ToJson(false));
 
-            await transactionsData.UpdateTransactionByPaymentId(paymentId, parameters);
+                var paymentIdSplit = payment.Id.Split('_');
+                var paymentIdPrefix = long.Parse(paymentIdSplit[0]);
+                var paymentIdSuffix = int.Parse(paymentIdSplit[1]);
 
-            PaymentStatus? status = null;
+                var transaction = await transactionsData.GetTransactionByPaymentId(paymentIdPrefix);
 
-            if (createPaymentResponse.Payment.StatusOutput.StatusCode == 5)
-            {
-                status = PaymentStatus.WaitingForMerchant;
+                dynamic parameters = new
+                {
+                    status = createPaymentResponse.Payment.Status,
+                    orderid = transaction.OrderId,
+                    paymentidsuffix = paymentIdSuffix
+                };
+
+                await transactionsData.UpdateTransactionByPaymentId(paymentIdPrefix, parameters);
+
+                PaymentStatus? status = null;
+
+                switch (createPaymentResponse.Payment.StatusOutput.StatusCode)
+                {
+                    case 5:
+                        {
+                            status = PaymentStatus.WaitingForMerchant;
+                            //var body = new CapturePaymentRequest
+                            //{
+                            //    Amount = payment.PaymentOutput.AmountOfMoney.Amount,
+                            //    IsFinal = true
+                            //};
+                            //var captureResponse = await paymentService.GetMerchant().Payments.CapturePayment(payment.Id, body);
+                            break;
+                        }
+                    case 9:
+                    case 91:
+                        status = PaymentStatus.Paid;
+                        break;
+                }
+
+                if (status.HasValue)
+                {
+                    await orderData.UpdateOrderByOrderId(transaction.OrderId, new { paymentstatus = status.Value });
+                }
+                await logger.Log($"Payment {paymentId} processed sucessfully");
             }
-            else if (createPaymentResponse.Payment.StatusOutput.StatusCode == 9)
+            catch (Exception ex)
             {
-                status = PaymentStatus.Paid;
-            }
-            else if (createPaymentResponse.Payment.StatusOutput.StatusCode == 91)
-            {
-                ///
-                //paymentService.CreateTestPayment
-            }
-
-            //CaptureResponse response = client.merchant("merchantId").payments().capture("paymentId", body);
-
-            if (status.HasValue)
-            {
-                await orderData.UpdateOrderByOrderId(transaction.OrderId, new { paymentstatus = status.Value });
+                await logger.Log($"Error processing payment response {paymentId}, {ex}");
             }
         }
     }
