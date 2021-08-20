@@ -36,7 +36,7 @@ namespace DataAccessLibrary
 
         public Task<List<BikeModel>> GetBikes()
         {
-            string sql = @"select b.id, p.price, b.model, b.make, p.amount, b.year from bikes b left join products p on b.id = p.id;";
+            string sql = @"select b.id, p.price, b.model, b.make, p.amount, b.year from bikes b left join products p on b.id = p.id order by b.id;";
             return db.LoadData<BikeModel, dynamic>(sql, new { });
         }
 
