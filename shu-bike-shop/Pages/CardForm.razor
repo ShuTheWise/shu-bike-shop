@@ -9,6 +9,8 @@
     </div>
 
     <div class="form-body">
+
+
         <EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
@@ -61,16 +63,13 @@
 
 
 @code {
-    public delegate Task SubmitDelegate(Card card);
-    public delegate Task TokenPayDelegate(TokenResponse tokenResponse, Card card);
+    public delegate Task SubmitDelegate(CardPaymentMethodSpecificInput card);
 
     [Parameter]
     public SubmitDelegate OnValidSubmit { get; set; }
 
-    [Parameter]
-    public TokenPayDelegate OnPayViaToken { get; set; }
-
     private bool paymentViaToken;
+
     private TokenResponse TokenResponse { get; set; }
 
     private bool isProcessing;
@@ -100,6 +99,8 @@
     {
         ExpiryDate = "1122"
     };
+
+    public int? PaymentProductId { get; set; } = 1;
 
     private EditContext editContext;
     private ValidationMessageStore messageStore;
@@ -187,6 +188,11 @@
             messageStore.Add(() => card.ExpiryDate, "Invalid cvv");
         }
 
+        if (!ValidateCreditCardProvider(card.CardNumber))
+        {
+            messageStore.Add(() => card.CardNumber, "Only Visa and Mastercard are accepted");
+        }
+
         if (paymentViaToken)
         {
             return;
@@ -226,6 +232,25 @@
         return true;
     }
 
+    private bool ValidateCreditCardProvider(string cardNo)
+    {
+        PaymentProductId = null;
+
+        if (int.TryParse(cardNo[0].ToString(), out int firstNum))
+        {
+            if (firstNum == 2 || firstNum == 5)
+            {
+                PaymentProductId = 3;
+            }
+            else if (firstNum == 4)
+            {
+                PaymentProductId = 1;
+            }
+        }
+
+        return PaymentProductId.HasValue;
+    }
+
     private static bool ValidateCreditCardNumber(string cardNo)
     {
         if (string.IsNullOrEmpty(cardNo))
@@ -245,23 +270,21 @@
 
     private async Task HandleValidSubmit()
     {
-        if (!paymentViaToken && OnValidSubmit != null)
+        if (OnValidSubmit != null)
         {
             isProcessing = true;
             this.StateHasChanged();
 
-            await OnValidSubmit(card);
+            CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
+            cardPaymentMethodSpecificInput.Card = card;
+            cardPaymentMethodSpecificInput.PaymentProductId = PaymentProductId;
 
-            isProcessing = false;
-            this.StateHasChanged();
-        }
+            if (paymentViaToken)
+            {
+                cardPaymentMethodSpecificInput.Token = TokenResponse.Id;
+            }
 
-        if (paymentViaToken && OnPayViaToken != null)
-        {
-            isProcessing = true;
-            this.StateHasChanged();
-
-            await OnPayViaToken(TokenResponse, card);
+            await OnValidSubmit(cardPaymentMethodSpecificInput);
 
             isProcessing = false;
             this.StateHasChanged();
