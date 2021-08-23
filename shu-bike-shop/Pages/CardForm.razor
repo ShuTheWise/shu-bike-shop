@@ -48,14 +48,14 @@
             </div>
 
             <!-- Buttons -->
-            @*@if (!isProcessing)*@
-  @*          {*@
+            @if (!isProcessing)
+            {
                 <button type="submit" class="proceed-btn">Proceed</button>
-@*            }*@
-            @*else
+            }
+            else
             {
                 <Loading />
-            }*@
+            }
         </EditForm>
     </div>
 </form>
@@ -84,18 +84,18 @@
             {"12","December" }
     };
 
-    private int minYear = 2022;
+    private int minYear = 2021;
     private int maxYear = 2050;
 
     private Card card = new Card
     {
-        ExpiryDate = "0122"
+        ExpiryDate = "1122"
     };
 
     private EditContext editContext;
     private ValidationMessageStore messageStore;
 
-    private string month = "01";
+    private string month = "11";
     private string year = "22";
 
     protected override void OnInitialized()
