@@ -6,4 +6,6 @@ namespace shu_bike_shop
     {
         Task Log(string content);
     }
+
+
 }

@@ -6,35 +6,30 @@
         <h4 class="title">Credit card detail</h4>
     </div>
 
+
     <div class="form-body">
         <EditForm EditContext="editContext" OnValidSubmit="@HandleValidSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <input type="text" class="card-number" placeholder="@card.CardholderName" @bind-value="card.CardholderName">
+            @*<button type="button" class="btn btn-danger" @onclick="@Fill">Fill</button>*@
+
+            <input type="text" class="card-number" placeholder="Name" @bind-value="card.CardholderName">
             <input type="text" class="card-number" placeholder="Card number" @bind-value="card.CardNumber">
 
             <!-- Date Field -->
             <div class="date-field">
                 <div class="month">
                     <select name="Month" @bind="@month">
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11" selected="selected">November</option>
-                        <option value="12">December</option>
+                        @foreach (var x in months)
+                        {
+                            <option value="@x.Key">@x.Value</option>
+                        }
                     </select>
                 </div>
                 <div class="year">
                     <select name="Year" @bind="@year">
-                        @for (int i = 2021; i < 2050; i++)
+                        @for (int i = minYear; i < maxYear; i++)
                         {
                             <option value="@i.ToString().Substring(2)">@i</option>
                         }
@@ -53,44 +48,91 @@
             </div>
 
             <!-- Buttons -->
-            @if (isProcessing)
-            {
-                <Loading></Loading>
-            }
-            else
-            {
+            @*@if (!isProcessing)*@
+  @*          {*@
                 <button type="submit" class="proceed-btn">Proceed</button>
-            }
+@*            }*@
+            @*else
+            {
+                <Loading />
+            }*@
         </EditForm>
     </div>
 </form>
 
 @code {
-    public bool isProcessing;
     public delegate Task SubmitDelegate(Card card);
 
     [Parameter]
     public SubmitDelegate OnValidSubmit { get; set; }
 
+    private bool isProcessing;
+    private static Random r = new Random();
+    private Dictionary<string, string> months = new Dictionary<string, string>()
+{
+            {"01","January" },
+            {"02","February"},
+            {"03","March"},
+            {"04","April"},
+            {"05","May"},
+            {"06","June"},
+            {"07","July"},
+            {"08","August"},
+            {"09","September"},
+            {"10","October"},
+            {"11","November"},
+            {"12","December" }
+    };
+
+    private int minYear = 2022;
+    private int maxYear = 2050;
+
     private Card card = new Card
     {
-        CardholderName = GenerateName(),
-        //CardNumber = "4929939366999414",
-        //Cvv = "904",
-        ExpiryDate = "1121"
+        ExpiryDate = "0122"
     };
 
     private EditContext editContext;
     private ValidationMessageStore messageStore;
 
-    private string month = "11";
-    private string year = "21";
+    private string month = "01";
+    private string year = "22";
 
     protected override void OnInitialized()
     {
         editContext = new(card);
         editContext.OnValidationRequested += HandleValidationRequested;
         messageStore = new(editContext);
+    }
+
+    private void Fill()
+    {
+        card.CardholderName = GenerateName();
+        card.Cvv = GenCvv().ToString();
+        card.CardNumber = "448555428071" + Gen();
+        year = GenYear().ToString().Substring(2);
+        month = GenMonth();
+    }
+
+    private string GenMonth()
+    {
+        var index = r.Next(0, 12);
+        return months.ElementAt(index).Key;
+    }
+
+    private int GenYear()
+    {
+        return r.Next(minYear, maxYear);
+    }
+
+    private int Gen()
+    {
+        return r.Next(1000, 9999);
+    }
+
+    private int GenCvv()
+    {
+        return r.Next(100, 999);
     }
 
     private void HandleValidationRequested(object sender, ValidationRequestedEventArgs args)
