@@ -13,13 +13,13 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <input type="text" class="card-number" placeholder="Name" @bind-value="card.CardholderName">
-            <input type="text" class="card-number" placeholder="Card number" @bind-value="card.CardNumber">
+            <input type="text" class="card-number" disabled="@paymentViaToken" placeholder="Name" @bind-value="card.CardholderName">
+            <input type="text" class="card-number" disabled="@paymentViaToken" placeholder="Card number" @bind-value="card.CardNumber">
 
             <!-- Date Field -->
             <div class="date-field">
                 <div class="month">
-                    <select name="Month" @bind="@month">
+                    <select name="Month" @bind="@month" disabled="@paymentViaToken">
                         @foreach (var x in months)
                         {
                             <option value="@x.Key">@x.Value</option>
@@ -27,7 +27,7 @@
                     </select>
                 </div>
                 <div class="year">
-                    <select name="Year" @bind="@year">
+                    <select name="Year" @bind="@year" disabled="@paymentViaToken">
                         @for (int i = minYear; i < maxYear; i++)
                         {
                             <option value="@i.ToString().Substring(2)">@i</option>
@@ -62,9 +62,16 @@
 
 @code {
     public delegate Task SubmitDelegate(Card card);
+    public delegate Task TokenPayDelegate(TokenResponse tokenResponse, Card card);
 
     [Parameter]
     public SubmitDelegate OnValidSubmit { get; set; }
+
+    [Parameter]
+    public TokenPayDelegate OnPayViaToken { get; set; }
+
+    private bool paymentViaToken;
+    private TokenResponse TokenResponse { get; set; }
 
     private bool isProcessing;
     private static Random r = new Random();
@@ -116,6 +123,33 @@
         month = GenMonth();
     }
 
+    public void Load(TokenResponse tokenResponse)
+    {
+        var cardWithoutCvv = tokenResponse.Card.Data.CardWithoutCvv;
+
+        card.CardholderName = cardWithoutCvv.CardholderName;
+        card.Cvv = "";
+        card.CardNumber = cardWithoutCvv.CardNumber;
+        year = cardWithoutCvv.ExpiryDate.Substring(2);
+        month = cardWithoutCvv.ExpiryDate.Substring(0, 2);
+
+
+        TokenResponse = tokenResponse;
+        paymentViaToken = true;
+    }
+
+    public void Clear()
+    {
+        card.CardholderName = "";
+        card.Cvv = "";
+        card.CardNumber = "";
+        year = "22";
+        month = "01";
+
+        paymentViaToken = false;
+        TokenResponse = null;
+    }
+
     private string GenMonth()
     {
         var index = r.Next(0, 12);
@@ -148,6 +182,16 @@
 
         card.ExpiryDate = month + year;
 
+        if (!ValidateCvv(card.Cvv))
+        {
+            messageStore.Add(() => card.ExpiryDate, "Invalid cvv");
+        }
+
+        if (paymentViaToken)
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(card.CardholderName))
         {
             messageStore.Add(() => card.CardNumber, "Invalid card holder");
@@ -162,14 +206,9 @@
         {
             messageStore.Add(() => card.CardNumber, "Invalid card number");
         }
-
-        if (!ValidateCvv(card.Cvv))
-        {
-            messageStore.Add(() => card.ExpiryDate, "Invalid cvv");
-        }
     }
 
-    public static bool ValidateCvv(string cvv)
+    private static bool ValidateCvv(string cvv)
     {
         if (string.IsNullOrEmpty(cvv))
         {
@@ -187,7 +226,7 @@
         return true;
     }
 
-    public static bool ValidateCreditCardNumber(string cardNo)
+    private static bool ValidateCreditCardNumber(string cardNo)
     {
         if (string.IsNullOrEmpty(cardNo))
         {
@@ -206,7 +245,7 @@
 
     private async Task HandleValidSubmit()
     {
-        if (OnValidSubmit != null)
+        if (!paymentViaToken && OnValidSubmit != null)
         {
             isProcessing = true;
             this.StateHasChanged();
@@ -216,9 +255,20 @@
             isProcessing = false;
             this.StateHasChanged();
         }
+
+        if (paymentViaToken && OnPayViaToken != null)
+        {
+            isProcessing = true;
+            this.StateHasChanged();
+
+            await OnPayViaToken(TokenResponse, card);
+
+            isProcessing = false;
+            this.StateHasChanged();
+        }
     }
 
-    public bool ValidateExpiryDate()
+    private bool ValidateExpiryDate()
     {
         if (year != "21")
         {

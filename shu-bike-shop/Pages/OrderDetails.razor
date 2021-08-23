@@ -6,6 +6,7 @@
 @using Ingenico.Direct.Sdk.Domain;
 
 @inject IOrderData orderData
+@inject ITokenData tokenData
 @inject ISecurityService securityService
 @inject IPaymentService paymentService
 @inject ITransactionsData transactionData
@@ -19,26 +20,34 @@
 
 @if (orderModel != null && orderModel.PaymentStatus == PaymentStatus.NotPaid)
 {
-    <select name="Month" @bind="PaymentProductId">
+    <select name="PaymentProductId" @bind="PaymentProductId">
         <option value="1">Visa</option>
         <option value="3">MasterCard</option>
     </select>
-
-    <select name="Month" @bind="AuthorizationMode">
+    <select name="AuthorizationMode" @bind="AuthorizationMode">
         <option value="SALE">Sale</option>
         <option value="PRE_AUTHORIZATION">Pre Authorization</option>
         <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
     </select>
+
+    @if (userTokenAliases != null)
+    {
+        <select name="Alias" @bind="@AliasId">
+            <option value="">Select saved card</option>
+            @for (int i = 0; i < userTokenAliases.Count; i++)
+            {
+                <option value="@i">@userTokenAliases[i]</option>
+            }
+        </select>
+    }
+
     <input type="checkbox" @bind-value="@IsRecurring">
     <label for="vehicle1">Recurring</label>
 
     @if (PaymentProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
     {
-        <CardForm OnValidSubmit="@Pay"></CardForm>
+        <CardForm OnValidSubmit="@PayAsync" @ref="@cardForm" OnPayViaToken="@PayViaTokenAsync"></CardForm>
     }
-
-    <input type="checkbox" @bind-value="@SaveCard">
-    <label for="vehicle1">Save card</label>
 }
 
 @if (!loaded)
@@ -76,8 +85,28 @@ else if (orderModel == null)
 }
 
 @code{
+    private CardForm cardForm;
     private User user;
     private bool IsPaid(OrderModel order) => order.PaymentStatus == PaymentStatus.Paid;
+    private List<TokenResponse> userTokens;
+    private List<string> userTokenAliases;
+    private int? aliasId;
+    private int? AliasId
+    {
+        get => aliasId;
+        set
+        {
+            aliasId = value;
+            if (aliasId.HasValue)
+            {
+                cardForm.Load(userTokens[aliasId.Value]);
+            }
+            else
+            {
+                cardForm.Clear();
+            }
+        }
+    }
 
     public OrderModel orderModel;
     private bool loaded;
@@ -85,19 +114,76 @@ else if (orderModel == null)
     [Parameter]
     public int? Id { get; set; }
     public int? PaymentProductId { get; set; } = 1;
-
     public bool IsRecurring { get; set; }
-    public bool SaveCard { get; set; }
-
     public string AuthorizationMode { get; set; } = "SALE";
 
     protected override async Task OnInitializedAsync()
     {
         user = await securityService.GetCurrentUser();
         await RefreshOrder();
+
+        if (user != null)
+        {
+            userTokens = await GetUserTokensAsync(user.Name);
+            userTokenAliases = userTokens.Select(x => x.Card.Alias).ToList();
+        }
     }
 
-    private async Task Pay(Card card)
+    private async Task<List<TokenResponse>> GetUserTokensAsync(string username)
+    {
+        var tokenCards = new List<TokenResponse>();
+
+        var tokens = await tokenData.GetTokens(username);
+
+        foreach (var token in tokens)
+        {
+            var tokenResponse = await paymentService.GetMerchant().Tokens.GetToken(token);
+            tokenCards.Add(tokenResponse);
+        }
+
+        return tokenCards;
+    }
+
+    private async Task PayViaTokenAsync(TokenResponse tokenResponse, Card card)
+    {
+        var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
+        {
+            PaymentProductId = tokenResponse.PaymentProductId,
+            Card = card,
+            AuthorizationMode = AuthorizationMode,
+            IsRecurring = IsRecurring,
+            Token = tokenResponse.Id
+        };
+
+        CreatePaymentRequest createPaymentRequest = CreateRequestWithCreditCardInfo();
+        createPaymentRequest.CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput;
+        
+        var response = await paymentService.GetMerchant().Payments.CreatePayment(createPaymentRequest);
+        var json = response.ToJson();
+    }
+
+    private CreatePaymentRequest CreateRequestWithCreditCardInfo()
+    {
+        var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+
+        var order = new Order()
+        {
+            AmountOfMoney = new AmountOfMoney()
+            {
+                Amount = amountOfMoney,
+                CurrencyCode = "EUR"
+            }
+        };
+
+        CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
+        {
+            Order = order,
+        };
+
+        return createPaymentRequest;
+    }
+
+    private async Task PayAsync(Card card)
     {
         var pay = await jSRuntime.Confirm($"Pay for order ?");
 
@@ -119,21 +205,6 @@ else if (orderModel == null)
 
         try
         {
-            var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
-
-            var order = new Order()
-            {
-                AmountOfMoney = new AmountOfMoney()
-                {
-                    Amount = amountOfMoney,
-                    CurrencyCode = "EUR"
-                },
-                References = new OrderReferences()
-                {
-                    Descriptor = "test desciptor"
-                }
-            };
-
             var cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput()
             {
                 PaymentProductId = PaymentProductId,
@@ -142,11 +213,8 @@ else if (orderModel == null)
                 IsRecurring = IsRecurring
             };
 
-            CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
-            {
-                CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput,
-                Order = order,
-            };
+            CreatePaymentRequest createPaymentRequest = CreateRequestWithCreditCardInfo();
+            createPaymentRequest.CardPaymentMethodSpecificInput = cardPaymentMethodSpecificInput;
 
             var response = await paymentService.CreatePayment(createPaymentRequest);
             var json = response.ToJson();
@@ -165,7 +233,49 @@ else if (orderModel == null)
         }
         //make a call to api controller or sth else so it is not awaited here
         await transactionData.AddTransaction(transaction);
-        await jSRuntime.Inform(message);
+        //await jSRuntime.Inform(message);
+
+        if (await jSRuntime.Confirm("Payment sucessful, do you want to save card information for future use?"))
+        {
+            var createdTokenResponse = await CreateToken(card);
+            await tokenData.AddToken(user.Name, createdTokenResponse.Token);
+
+            string message2 = "Error saving card";
+            if (createdTokenResponse != null)
+            {
+                try
+                {
+                    var tokenResponse = await paymentService.GetMerchant().Tokens.GetToken(createdTokenResponse.Token);
+                    message2 = $"Sucessfully saved card, alis: {tokenResponse.Card.Alias}";
+                }
+                catch
+                {
+                    message2 = "Sucessfully saved card, but could not retrive";
+                }
+            }
+
+            await jSRuntime.Inform(message2);
+        }
+    }
+
+    private async Task<CreatedTokenResponse> CreateToken(Card card)
+    {
+        try
+        {
+            var body = new CreateTokenRequest();
+            TokenCardSpecificInput tokenCardSpecificInput = new TokenCardSpecificInput();
+            tokenCardSpecificInput.Data = new Ingenico.Direct.Sdk.Domain.TokenData();
+            tokenCardSpecificInput.Data.Card = card;
+            body.PaymentProductId = PaymentProductId.Value;
+            body.Card = tokenCardSpecificInput;
+            return await paymentService.GetMerchant().Tokens.CreateToken(body);
+        }
+        catch
+        {
+
+        }
+
+        return null;
     }
 
     private async Task RefreshOrder()

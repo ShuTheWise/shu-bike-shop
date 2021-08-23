@@ -51,6 +51,7 @@ namespace shu_bike_shop
             services.AddTransient<IOrderData, OrderData>();
             services.AddTransient<ITransactionsData, TransactionsData>();
             services.AddTransient<IReceivedCreatePaymentResponseData, ReceivedCreatePaymentResponseData>();
+            services.AddTransient<ITokenData, TokenData>();
 
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUserService, UserService>();
