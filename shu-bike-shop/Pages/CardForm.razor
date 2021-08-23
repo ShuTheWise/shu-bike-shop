@@ -12,7 +12,7 @@
             <ValidationSummary />
 
             <input type="text" class="card-number" placeholder="@card.CardholderName" @bind-value="card.CardholderName">
-            <input type="text" class="card-number" placeholder="@card.CardNumber" @bind-value="card.CardNumber">
+            <input type="text" class="card-number" placeholder="Card number" @bind-value="card.CardNumber">
 
             <!-- Date Field -->
             <div class="date-field">
@@ -45,7 +45,7 @@
             <!-- Card Verification Field -->
             <div class="card-verification">
                 <div class="cvv-input">
-                    <input type="text" placeholder="@card.Cvv" @bind-value="@card.Cvv">
+                    <input type="text" placeholder="cvv" @bind-value="@card.Cvv">
                 </div>
                 <div class="cvv-details">
                     <p>3 or 4 digits usually found <br> on the signature strip</p>
@@ -75,8 +75,8 @@
     private Card card = new Card
     {
         CardholderName = GenerateName(),
-        CardNumber = "4929939366999414",
-        Cvv = "904",
+        //CardNumber = "4929939366999414",
+        //Cvv = "904",
         ExpiryDate = "1121"
     };
 

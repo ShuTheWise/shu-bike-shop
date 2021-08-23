@@ -29,13 +29,16 @@
         <option value="PRE_AUTHORIZATION">Pre Authorization</option>
         <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
     </select>
-    <input type="checkbox" id="vehicle1" name="vehicle1" @bind-value="@IsRecurring">
+    <input type="checkbox" @bind-value="@IsRecurring">
     <label for="vehicle1">Recurring</label>
 
     @if (PaymentProductId.HasValue && !string.IsNullOrEmpty(AuthorizationMode))
     {
         <CardForm OnValidSubmit="@Pay"></CardForm>
     }
+
+    <input type="checkbox" @bind-value="@SaveCard">
+    <label for="vehicle1">Save card</label>
 }
 
 @if (!loaded)
@@ -84,6 +87,8 @@ else if (orderModel == null)
     public int? PaymentProductId { get; set; } = 1;
 
     public bool IsRecurring { get; set; }
+    public bool SaveCard { get; set; }
+
     public string AuthorizationMode { get; set; } = "SALE";
 
     protected override async Task OnInitializedAsync()
@@ -158,7 +163,7 @@ else if (orderModel == null)
             message = ex.ToString();
             transaction.ErrorMessage = message;
         }
-
+        //make a call to api controller or sth else so it is not awaited here
         await transactionData.AddTransaction(transaction);
         await jSRuntime.Inform(message);
     }
