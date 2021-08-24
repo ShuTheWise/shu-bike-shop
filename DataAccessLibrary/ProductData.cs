@@ -22,12 +22,6 @@ namespace DataAccessLibrary
             return Type.GetType($"DataAccessLibrary.Models.{typePrefix}Model");
         }
 
-        //public Task<List<ProductModel>> GetProducts()
-        //{
-        //    const string sql = "select * from products";
-        //    return db.LoadData<ProductModel, dynamic>(sql, new { });
-        //}
-
         public Task DecrementProductAmount(int id, int amount)
         {
             const string sql = "update products set amount = amount - @amount where id = @Id";

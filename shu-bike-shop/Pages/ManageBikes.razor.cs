@@ -32,7 +32,8 @@ namespace shu_bike_shop.Pages
                 make = bikeModel.Make,
                 model = bikeModel.Model,
                 price = bikeModel.Price,
-                year = bikeModel.Year
+                year = bikeModel.Year,
+                imageurl = bikeModel.ImageUrl,
             };
 
             await productData.UpdateProduct<BikeModel>(bikeModel.Id, updateModel);
