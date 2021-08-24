@@ -13,21 +13,12 @@ namespace shu_bike_shop.Pages
 {
     public partial class PayForOrder
     {
-        [Parameter]
-        public OrderDetails parent { get; set; }
-
-        [Parameter]
-        public OrderModel orderModel { get; set; }
-
-        [Parameter]
-        public User user{ get; set; }
+        [Parameter] public OrderDetails parent { get; set; }
 
         public bool IsRecurring { get; set; }
         public string AuthorizationMode { get; set; }
 
-        [Inject] private IOrderData orderData { get; set; }
         [Inject] private ITokenData tokenData { get; set; }
-        [Inject] private ISecurityService securityService { get; set; }
         [Inject] private IPaymentService paymentService { get; set; }
         [Inject] private ITransactionsData transactionData { get; set; }
         [Inject] private IJSRuntime jSRuntime { get; set; }
@@ -57,9 +48,9 @@ namespace shu_bike_shop.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            if (user != null)
+            if (parent.user != null)
             {
-                userTokens = await GetUserTokensAsync(user.Name);
+                userTokens = await GetUserTokensAsync(parent.user.Name);
                 userTokenAliases = userTokens.Select(x => x.Card.Alias).ToList();
             }
         }
@@ -81,7 +72,7 @@ namespace shu_bike_shop.Pages
 
         private CreatePaymentRequest CreateRequestWithoutCreditCardInfo()
         {
-            var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+            var amountOfMoney = long.Parse((parent.orderModel.TotalAmount * 100).ToString());
 
             var order = new Order()
             {
@@ -112,9 +103,9 @@ namespace shu_bike_shop.Pages
             TransactionCreateModel transaction = new TransactionCreateModel
             {
                 PaymentProductId = cardPaymentMethod.PaymentProductId.Value,
-                Amount = orderModel.TotalAmount,
-                Username = user.Name,
-                OrderId = orderModel.Id,
+                Amount = parent.orderModel.TotalAmount,
+                Username = parent.user.Name,
+                OrderId = parent.orderModel.Id,
                 CardholderName = cardPaymentMethod.Card.CardholderName
             };
 
@@ -145,20 +136,17 @@ namespace shu_bike_shop.Pages
 
             //make a call to api controller or sth else so it is not awaited here
             await transactionData.AddTransaction(transaction);
-            await orderData.UpdateOrderByOrderId(transaction.OrderId, new { paymentstatus = PaymentStatus.ProcessingPayment });
-            //await jSRuntime.Inform(message);
 
             if (AliasId.HasValue)
             {
                 await jSRuntime.Inform("Payment sucessful");
-                return;
             }
             else
             {
                 if (await jSRuntime.Confirm("Payment sucessful, do you want to save card information for future use?"))
                 {
                     var createdTokenResponse = await CreateToken(cardPaymentMethod);
-                    await tokenData.AddToken(user.Name, createdTokenResponse.Token);
+                    await tokenData.AddToken(parent.user.Name, createdTokenResponse.Token);
 
                     string message2 = "Error saving card";
                     if (createdTokenResponse != null)
@@ -178,8 +166,10 @@ namespace shu_bike_shop.Pages
                 }
             }
 
-            await parent.RefreshOrder();
-            StateHasChanged();
+            while (parent.orderModel.PaymentStatus == PaymentStatus.NotPaid)
+            {
+                await parent.RefreshOrder();
+            }
         }
 
         private async Task<CreatedTokenResponse> CreateToken(CardPaymentMethodSpecificInput input)
