@@ -13,8 +13,7 @@ namespace shu_bike_shop.Pages
     {
         public delegate Task SubmitDelegate(CardPaymentMethodSpecificInput card);
 
-        [Parameter]
-        public SubmitDelegate OnValidSubmit { get; set; }
+        [Parameter] public SubmitDelegate OnValidSubmit { get; set; }
         public int? PaymentProductId { get; set; } = 1;
 
         private static readonly Random random = new();
@@ -24,18 +23,18 @@ namespace shu_bike_shop.Pages
         private readonly long[] cards = new[] { 4539621432530835, 4207119164078249, 4578973198822589, 4916011604337123, 4024007185178505, 4539475867524734, 4936251254334329, 4916594740987885, 4926089846021729 };
         private readonly Dictionary<string, string> months = new()
         {
-            {"01","January" },
-            {"02","February"},
-            {"03","March"},
-            {"04","April"},
-            {"05","May"},
-            {"06","June"},
-            {"07","July"},
-            {"08","August"},
-            {"09","September"},
-            {"10","October"},
-            {"11","November"},
-            {"12","December" }
+            { "01", "January" },
+            { "02", "February" },
+            { "03", "March" },
+            { "04", "April" },
+            { "05", "May" },
+            { "06", "June" },
+            { "07", "July" },
+            { "08", "August" },
+            { "09", "September" },
+            { "10", "October" },
+            { "11", "November" },
+            { "12", "December" }
         };
 
         private Card card = new Card { ExpiryDate = "1122" };
