@@ -8,30 +8,8 @@
 
 @if (orderModel != null && orderModel.PaymentStatus == PaymentStatus.NotPaid)
 {
-    <select name="AuthorizationMode" @bind="AuthorizationMode">
-        <option value="SALE">Sale</option>
-        <option value="PRE_AUTHORIZATION">Pre Authorization</option>
-        <option value="FINAL_AUTHORIZATION ">Final Authorization</option>
-    </select>
-
-    @if (userTokenAliases != null)
-    {
-        <select name="Alias" @bind="@AliasId">
-            <option value="">Select saved card</option>
-            @for (int i = 0; i < userTokenAliases.Count; i++)
-            {
-                <option value="@i">@userTokenAliases[i]</option>
-            }
-        </select>
-    }
-
-    <input type="checkbox" @bind-value="@IsRecurring">
-    <label for="vehicle1">Recurring</label>
-
-    @if (!string.IsNullOrEmpty(AuthorizationMode))
-    {
-        <CardForm OnValidSubmit="@PayAsync" @ref="@cardForm"></CardForm>
-    }
+    <PayForOrder parent="this" user="user" orderModel="orderModel">
+    </PayForOrder>
 }
 
 @if (!loaded)

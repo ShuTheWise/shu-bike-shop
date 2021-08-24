@@ -208,7 +208,7 @@ namespace shu_bike_shop.Pages
             if (OnValidSubmit != null)
             {
                 isProcessing = true;
-                this.StateHasChanged();
+                StateHasChanged();
 
                 CardPaymentMethodSpecificInput cardPaymentMethodSpecificInput = new CardPaymentMethodSpecificInput();
                 cardPaymentMethodSpecificInput.Card = card;
@@ -222,7 +222,7 @@ namespace shu_bike_shop.Pages
                 await OnValidSubmit(cardPaymentMethodSpecificInput);
 
                 isProcessing = false;
-                this.StateHasChanged();
+                StateHasChanged();
             }
         }
 
