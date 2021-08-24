@@ -10,7 +10,7 @@ namespace shu_bike_shop.Pages
     {
         [Inject] private NavigationManager navigationManager { get; set; }
         [Inject] private IJSRuntime runtime { get; set; }
-        [Inject] private IBikesData bikesData { get; set; }
+        [Inject] private IProductData productData { get; set; }
 
         private BikeCreateModel model = new();
 
@@ -18,7 +18,9 @@ namespace shu_bike_shop.Pages
         {
             try
             {
-                var bike = await bikesData.AddBike(model);
+                await productData.AddProduct<BikeModel, BikeCreateModel>(model);
+
+                //var bike = await bikesData.AddBike(model);
                 navigationManager.NavigateTo("/bikes");
             }
             catch

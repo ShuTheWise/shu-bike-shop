@@ -6,7 +6,7 @@
     Order details
 </h1>
 
-@if (orderModel != null && orderModel.PaymentStatus == PaymentStatus.NotPaid)
+@if (orderModel is { PaymentStatus: PaymentStatus.NotPaid })
 {
     <PayForOrder parent="this" user="user">
     </PayForOrder>
@@ -18,7 +18,9 @@
 }
 else if (orderModel == null)
 {
-    <p><em>"There is nothing here..."</em></p>
+    <p>
+        <em>"There is nothing here..."</em>
+    </p>
 }
 
 @if (orderModel != null)
@@ -45,3 +47,32 @@ else if (orderModel == null)
         </tbody>
     </table>
 }
+
+<h2>
+    Products
+</h2>
+
+@*@if (orderProducts != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var orderProduct in orderProducts)
+            {
+                <tr>
+                    <td>@orderProduct.pro</td>
+                    <td>@orderProduct.Quantity</td>
+                    <td>@orderProduct.Price</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}*@ 

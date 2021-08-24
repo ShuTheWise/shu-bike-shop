@@ -8,36 +8,36 @@ namespace shu_bike_shop.Pages
 {
     public partial class ManageBikes
     {
-        [Inject] private IBikesData bikesData { get; set; }
+        [Inject] private IProductData productData { get; set; }
         [Inject] private NavigationManager NavigationManager { get; set; }
 
         private List<BikeModel> bikes;
 
         protected override async Task OnInitializedAsync()
         {
-            bikes = await bikesData.GetBikes();
+            bikes = await productData.GetProducts<BikeModel>();
         }
 
         private async Task DeleteBike(ProductModel productModel)
         {
-            await bikesData.RemoveBike(productModel.Id);
+            await productData.RemoveProduct(productModel.Id);
+            await OnInitializedAsync();
         }
 
         private async Task UpdateBike(BikeModel bikeModel)
         {
-            var updateModel = new BikeUpdateModel()
+            dynamic updateModel = new
             {
-                Id = bikeModel.Id,
-                Amount = bikeModel.Amount,
-                Make = bikeModel.Make,
-                Model = bikeModel.Model,
-                Price = bikeModel.Price,
-                Year = bikeModel.Year
+                amount = bikeModel.Amount,
+                make = bikeModel.Make,
+                model = bikeModel.Model,
+                price = bikeModel.Price,
+                year = bikeModel.Year
             };
 
-            await bikesData.UpdateBike(updateModel);
+            await productData.UpdateProduct<BikeModel>(bikeModel.Id, updateModel);
 
-            NavigationManager.NavigateTo("/bikes");
+            await OnInitializedAsync();
         }
     }
 }

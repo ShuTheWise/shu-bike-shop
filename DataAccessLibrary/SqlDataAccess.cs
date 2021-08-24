@@ -30,6 +30,16 @@ namespace DataAccessLibrary
             }
         }
 
+        public async Task<List<T>> LoadData<T,U>(Type t, string sql, U parameters) where T : class
+        {
+            var connectionString = config[ConnectionStringName];
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                var data = await connection.QueryAsync(t, sql, parameters);
+                return data.Cast<T>().ToList();
+            }
+        }
+
         public async Task SaveData<T>(string sql, T parameters)
         {
             var connectionString = config[ConnectionStringName];
@@ -56,6 +66,26 @@ namespace DataAccessLibrary
             {
                 var data = await connection.QuerySingleAsync<T>(sql, parameters);
                 return data;
+            }
+        }
+
+        public async Task<T> LoadSingleOrDefault<T, U>(string sql, U parameters)
+        {
+            var connectionString = config[ConnectionStringName];
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                var data = await connection.QuerySingleOrDefaultAsync<T>(sql, parameters);
+                return data;
+            }
+        }
+
+        public async Task<T> LoadSingleOrDefault<T, U>(Type t, string sql, U parameters) where T : class
+        {
+            var connectionString = config[ConnectionStringName];
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                var data = await connection.QuerySingleOrDefaultAsync(t, sql, parameters);
+                return data as T;
             }
         }
     }

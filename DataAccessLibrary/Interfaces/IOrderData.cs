@@ -12,5 +12,6 @@ namespace DataAccessLibrary
         Task<List<OrderModel>> GetOrders(string userEmail);
         Task UpdateOrderByOrderId(int orderid, dynamic orderModel);
         Task UpdatePaymentStatus(int orderId, PaymentStatus status);
+        Task<List<OrderProductModel>> GetOrderProducts(int orderId);
     }
 }

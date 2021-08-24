@@ -9,7 +9,7 @@ namespace shu_bike_shop.Pages
 {
     public partial class Bikes
     {
-        [Inject] private IBikesData bikesData { get; set; }
+        [Inject] private IProductData productData { get; set; }
         [Inject] private IBasketService basket { get; set; }
         [Inject] private IJSRuntime jSRuntime { get; set; }
 
@@ -17,7 +17,7 @@ namespace shu_bike_shop.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            bikes = await bikesData.GetBikes();
+            bikes = await productData.GetProducts<BikeModel>();
         }
 
         private async Task AddProductToBasket(ProductModel productModel)

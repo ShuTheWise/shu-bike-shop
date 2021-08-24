@@ -11,6 +11,8 @@ namespace shu_bike_shop.Pages
         [Parameter] public int? Id { get; set; }
 
         public OrderModel orderModel { get; private set; }
+
+        //public BasketItemModel BasketItemModel;
         public User user { get; private set; }
 
         [Inject] private IOrderData orderData { get; set; }
