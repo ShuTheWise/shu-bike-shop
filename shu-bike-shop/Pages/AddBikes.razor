@@ -1,11 +1,4 @@
-﻿@using DataAccessLibrary.Models
-@using DataAccessLibrary
-
-@inject NavigationManager navigationManager
-@inject IJSRuntime runtime
-@inject IBikesData bikesData
-
-<h1>Add bike </h1>
+﻿<h1>Add bike </h1>
 <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -31,20 +24,3 @@
     </div>
     <button type="submit" class="btn btn-primary">Add</button>
 </EditForm>
-
-@code{
-    private BikeCreateModel model = new();
-
-    private async Task HandleValidSubmit()
-    {
-        try
-        {
-            var bike = await bikesData.AddBike(model);
-            navigationManager.NavigateTo("/bikes");
-        }
-        catch (Exception ex)
-        {
-            await runtime.Inform("Something went wrong");
-        }
-    }
-}

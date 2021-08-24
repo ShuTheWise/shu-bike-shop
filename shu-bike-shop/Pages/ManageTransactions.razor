@@ -1,11 +1,4 @@
 ﻿@page "/managetransactions"
-
-@using DataAccessLibrary
-@using DataAccessLibrary.Models
-
-@inject ITransactionsData transactionData
-@inject IJSRuntime jSRuntime
-
 <AuthorizeView Roles="Administrators">
     <Authorized>
         @if (transactions == null)
@@ -45,28 +38,3 @@
         }
     </Authorized>
 </AuthorizeView>
-@code
-{
-    private List<TransactionModel> transactions;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await RefreshTransactions();
-    }
-
-    private async Task RefreshTransactions()
-    {
-        transactions = await transactionData.GetTransactions();
-    }
-
-    //private async Task UpdateTransaction(TransactionModel orderModel)
-    //{
-    //    var model = new TransactionUpdateModel()
-    //    {
-    //        Id = orderModel.Id,
-    //        PaymentMethod = orderModel.PaymentMethod
-    //    };
-
-    //    await RefreshTransactions();
-    //}
-}

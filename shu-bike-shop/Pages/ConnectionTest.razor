@@ -1,7 +1,5 @@
 ﻿@page "/connectionTest"
 
-@using PaymentAccessService;
-@inject IPaymentService paymentService
 <h1>Merchant test</h1>
 <div>
     Merchant: @paymentService.MerchantId
@@ -26,43 +24,6 @@
                       @bind-value="testPaymentResult"
                       @bind-value:event="oninput" />
         </div>
-    }
-}
-
-@code{
-    private string connectionTestResult;
-    private string testPaymentResult;
-
-    private bool testPaymentPerformed;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            testPaymentPerformed = false;
-            var testConnection = await paymentService.TestConnection();
-            connectionTestResult = testConnection.Result;
-        }
-        catch (Exception ex)
-        {
-            connectionTestResult = ex.ToString();
-        }
-    }
-
-    protected async Task CreateTestPayment()
-    {
-        testPaymentPerformed = true;
-        testPaymentResult = "";
-
-        try
-        {
-            var paymentResponse = await paymentService.CreateTestPayment();
-            testPaymentResult = paymentResponse.ToJson();
-        }
-        catch (Exception ex)
-        {
-            testPaymentResult = ex.ToString();
-        }
     }
 }
 

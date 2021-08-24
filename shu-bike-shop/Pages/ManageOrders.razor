@@ -1,14 +1,6 @@
 ﻿@page "/manageorders"
 
 @using DataAccessLibrary
-@using DataAccessLibrary.Models
-
-@inject IOrderData orderData
-@inject ITransactionsData transactionData
-@inject IJSRuntime jSRuntime
-@inject ISecurityService securityService
-@inject NavigationManager navigationManager
-
 <AuthorizeView Roles="Administrators">
     <Authorized>
         @if (orders == null)
@@ -67,30 +59,3 @@
         }
     </Authorized>
 </AuthorizeView>
-@code
-{
-    private List<OrderModel> orders;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await RefreshOrders();
-    }
-
-    private async Task RefreshOrders()
-    {
-        orders = await orderData.GetOrders();
-    }
-
-    private async Task UpdateOrder(OrderModel orderModel)
-    {
-        dynamic model = new
-        {
-            orderstatus = orderModel.OrderStatus,
-            paymentstatus = orderModel.PaymentStatus
-        };
-
-        await orderData.UpdateOrderByOrderId(orderModel.Id, model);
-
-        await RefreshOrders();
-    }
-}

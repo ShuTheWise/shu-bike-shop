@@ -1,12 +1,5 @@
 ﻿@page "/bikes"
 
-@using DataAccessLibrary
-@using DataAccessLibrary.Models
-
-@inject IBikesData bikesData
-@inject IBasketService basket
-@inject IJSRuntime jSRuntime
-
 @if (bikes == null)
 {
     <Loading></Loading>
@@ -38,30 +31,4 @@ else
             }
         </tbody>
     </table>
-}
-
-@code {
-    private List<BikeModel> bikes;
-
-    protected override async Task OnInitializedAsync()
-    {
-        bikes = await bikesData.GetBikes();
-    }
-
-    private async Task AddProductToBasket(ProductModel productModel)
-    {
-        try
-        {
-            var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
-
-            if (add)
-            {
-                await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
-            }
-        }
-        catch (InsufficientProductAmountException ex)
-        {
-            await jSRuntime.Inform(ex.Message);
-        }
-    }
 }

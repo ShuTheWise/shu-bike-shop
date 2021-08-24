@@ -1,16 +1,4 @@
 ﻿@page "/orders"
-
-@using PaymentAccessService
-@using DataAccessLibrary
-@using DataAccessLibrary.Models
-
-@inject IOrderData orderData
-@inject IPaymentService paymentService
-@inject ITransactionsData transactionData
-@inject IJSRuntime jSRuntime
-@inject ISecurityService securityService
-@inject NavigationManager navigationManager
-
 <AuthorizeView Roles="Users">
     <Authorized>
         @if (orders == null)
@@ -52,28 +40,3 @@
         }
     </Authorized>
 </AuthorizeView>
-
-@code
-{
-    private User user;
-    private List<OrderModel> orders;
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await securityService.GetCurrentUser();
-        if (user != null)
-        {
-            orders = await orderData.GetOrders(user.Name);
-        }
-    }
-
-    private void GoToOrder(OrderModel orderModel)
-    {
-        navigationManager.NavigateTo($"orders/{orderModel.Id}");
-    }
-
-    private string OrderLink(OrderModel orderModel)
-    {
-        return $"orders/{orderModel.Id}";
-    }
-}

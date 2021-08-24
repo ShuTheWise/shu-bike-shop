@@ -3,11 +3,7 @@
 @using DataAccessLibrary
 @using DataAccessLibrary.Models
 
-@inject IJSRuntime jSRuntime
-@inject IBasketService basketService
-@inject IOrderData orderData
-@inject IProductData productData
-@inject ISecurityService securityService
+
 
 @if (basketItems == null)
 {
@@ -50,57 +46,5 @@ else
                 You need to be logged in to place your order.
             </small>
         </div>
-    }
-}
-
-@code {
-    private User user;
-    private bool CanPlaceOrder => user != null && user.CanPlaceOrder;
-    private bool BuyingDisabled => !CanPlaceOrder;
-
-    private decimal totalAmount;
-    private List<BasketItemModel> basketItems;
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = await securityService.GetCurrentUser();
-        basketItems = await basketService.GetBasketItems();
-        RefreshTotalAmount();
-    }
-
-    private async Task PlaceOrder()
-    {
-        user = await securityService.GetCurrentUser();
-
-        var orderModel = await orderData.AddOrder(new OrderCreateModel()
-        {
-            UserEmail = user.Name,
-            TotalAmount = totalAmount,
-            Items = basketItems.Select(x => new OrderProductModel
-            {
-                ProductId = x.Product.Id,
-                UnitPrice = x.Product.Price,
-                Amount = x.Quantity
-            }).ToList()
-        });
-
-        foreach (var item in basketItems)
-        {
-            await productData.DecrementProductAmount(item.Product.Id, item.Quantity);
-        }
-
-        await basketService.ClearBasket();
-        basketItems = new List<BasketItemModel>();
-
-        await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
-    }
-
-    private void RefreshTotalAmount()
-    {
-        totalAmount = 0;
-        foreach (var item in basketItems)
-        {
-            totalAmount += item.Price;
-        }
     }
 }

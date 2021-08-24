@@ -1,5 +1,4 @@
 ﻿@page "/login"
-@using System.Security.Claims
 <AuthorizeView>
     <Authorized>
         <form method="get" action="Identity/Account/Manage">
@@ -21,14 +20,3 @@
     <NotAuthorized>
     </NotAuthorized>
 </AuthorizeView>
-@code{
-
-    private IEnumerable<string> GetRoles(ClaimsPrincipal User)
-    {
-        var roles = ((ClaimsIdentity)User.Identity).Claims
-                .Where(c => c.Type == ClaimTypes.Role)
-                .Select(c => c.Value);
-
-        return roles;
-    }
-}
