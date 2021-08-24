@@ -8,7 +8,7 @@
 
 @if (orderModel is { PaymentStatus: PaymentStatus.NotPaid })
 {
-    <PayForOrder parent="this" user="user">
+    <PayForOrder parent="this">
     </PayForOrder>
 }
 
@@ -52,27 +52,27 @@ else if (orderModel == null)
     Products
 </h2>
 
-@*@if (orderProducts != null)
+@if (orderProductDetailsModel != null)
 {
     <table class="table">
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>Quantity</th>
-                <th>Price</th>
+                <th>Total cost</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var orderProduct in orderProducts)
+            @foreach (var orderProduct in orderProductDetailsModel)
             {
                 <tr>
-                    <td>@orderProduct.pro</td>
-                    <td>@orderProduct.Quantity</td>
-                    <td>@orderProduct.Price</td>
+                    <td><img height="150px" src="@orderProduct.ProductModel.ImageUrl" /></td>
+                    <td>@orderProduct.OrderProduct.Amount</td>
+                    <td>@orderProduct.OrderProduct.TotalPrice</td>
                 </tr>
-
             }
         </tbody>
     </table>
-}*@ 
+}
