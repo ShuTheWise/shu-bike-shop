@@ -1,6 +1,6 @@
 .top-row {
     height: 4rem;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0,0,0,0);
 }
 
 .navbar-brand {
@@ -11,7 +11,10 @@
 }
 
 .logo {
-    height: 100%;
+    height: 150%;
+    display: initial;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .oi {
