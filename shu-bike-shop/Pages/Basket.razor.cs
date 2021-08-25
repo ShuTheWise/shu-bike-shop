@@ -26,6 +26,11 @@ namespace shu_bike_shop.Pages
         protected override async Task OnInitializedAsync()
         {
             user = await securityService.GetCurrentUser();
+            await RefreshBasket();
+        }
+
+        private async Task RefreshBasket()
+        {
             basketItems = await basketService.GetBasketItems();
             RefreshTotalAmount();
         }
@@ -63,6 +68,15 @@ namespace shu_bike_shop.Pages
             foreach (var item in basketItems)
             {
                 totalAmount += item.Price;
+            }
+        }
+
+        private async Task RemoveProduct(int id)
+        {
+            if(await jSRuntime.Confirm("Remove product from the basket?"))
+            {
+                await basketService.RemoveProduct(id);
+                await RefreshBasket();
             }
         }
     }

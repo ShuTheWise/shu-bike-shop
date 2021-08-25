@@ -11,5 +11,6 @@ namespace shu_bike_shop
         Task ClearBasket();
         Task<BasketItemModel> GetBasketItem(int productId);
         Task<List<BasketItemModel>> GetBasketItems();
+        Task RemoveProduct(int productId);
     }
 }
