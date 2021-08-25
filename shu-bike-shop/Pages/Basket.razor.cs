@@ -10,6 +10,7 @@ namespace shu_bike_shop.Pages
 {
     public partial class Basket
     {
+        [Inject] private ModalService modalService{ get; set; }
         [Inject] private IJSRuntime jSRuntime { get; set; }
         [Inject] private IBasketService basketService { get; set; }
         [Inject] private IOrderData orderData { get; set; }
@@ -67,6 +68,7 @@ namespace shu_bike_shop.Pages
             await basketService.ClearBasket();
             basketItems = new List<BasketItemModel>();
 
+            await modalService.Inform($"Your order is placed, your Order number is { orderModel.Id }");
             await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
         }
 

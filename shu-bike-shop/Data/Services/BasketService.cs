@@ -1,33 +1,12 @@
 ﻿using DataAccessLibrary;
 using DataAccessLibrary.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.JSInterop;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace shu_bike_shop
 {
-    public class CookieService : ICookieService
-    {
-        private readonly IJSRuntime jsRuntime;
-
-        public CookieService(IJSRuntime jsRuntime)
-        {
-            this.jsRuntime = jsRuntime;
-        }
-
-        public Task<T> GetCookie<T>(string name)
-        {
-            return jsRuntime.InvokeAsync<T>("blazorExtensions.GetCookie", name).AsTask();
-        }
-
-        public async Task WriteCookie(string name, object value, int days)
-        {
-            await jsRuntime.InvokeAsync<object>("blazorExtensions.WriteCookie", name, value, days);
-        }
-    }
-
     public class BasketService : IBasketService
     {
         private readonly IProductData productData;
