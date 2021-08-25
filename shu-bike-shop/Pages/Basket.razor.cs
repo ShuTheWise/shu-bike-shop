@@ -26,7 +26,15 @@ namespace shu_bike_shop.Pages
         protected override async Task OnInitializedAsync()
         {
             user = await securityService.GetCurrentUser();
-            await RefreshBasket();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await RefreshBasket();
+                StateHasChanged();
+            }
         }
 
         private async Task RefreshBasket()
@@ -73,11 +81,34 @@ namespace shu_bike_shop.Pages
 
         private async Task RemoveProduct(int id)
         {
-            if(await jSRuntime.Confirm("Remove product from the basket?"))
+            if (await jSRuntime.Confirm("Remove product from the basket?"))
             {
-                await basketService.RemoveProduct(id);
+                basketItems.RemoveAll(x => x.Product.Id == id);
+
+                await UpdateBasket();
                 await RefreshBasket();
             }
+        }
+
+        private async Task SetQuantity(ChangeEventArgs changeEventArgs, BasketItemModel basketItemModel)
+        {
+            basketItemModel.Quantity = int.Parse(changeEventArgs.Value.ToString());
+            RefreshTotalAmount();
+            await basketService.SetBasketItems(basketItems);
+        }
+
+        private async Task UpdateBasket()
+        {
+            await basketService.SetBasketItems(basketItems);
+        }
+
+        private async Task ClearBasket()
+        {
+            basketItems = null;
+            StateHasChanged();
+
+            await basketService.ClearBasket();
+            await RefreshBasket();
         }
     }
 }

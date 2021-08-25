@@ -1,53 +1,81 @@
-﻿using DataAccessLibrary.Models;
-using System;
+﻿using DataAccessLibrary;
+using DataAccessLibrary.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.JSInterop;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace shu_bike_shop
 {
+    public class CookieService : ICookieService
+    {
+        private readonly IJSRuntime jsRuntime;
+
+        public CookieService(IJSRuntime jsRuntime)
+        {
+            this.jsRuntime = jsRuntime;
+        }
+
+        public Task<T> GetCookie<T>(string name)
+        {
+            return jsRuntime.InvokeAsync<T>("blazorExtensions.GetCookie", name).AsTask();
+        }
+
+        public async Task WriteCookie(string name, object value, int days)
+        {
+            await jsRuntime.InvokeAsync<object>("blazorExtensions.WriteCookie", name, value, days);
+        }
+    }
+
     public class BasketService : IBasketService
     {
-        private List<BasketItemModel> Products { get; set; } = new List<BasketItemModel>();
+        private readonly IProductData productData;
+        private readonly ICookieService cookieService;
 
-        public async Task AddProduct(ProductModel productModel, Func<Task<bool>> raiseQuantity = null)
+        private const string ServiceBusyCookie = "ServiceBusy";
+        private const string ProductsCookieName = "BasketProducts";
+
+        public BasketService(ICookieService cookieService, IProductData productData)
         {
-            var productId = productModel.Id;
-            var basketItem = await GetBasketItem(productId);
+            this.cookieService = cookieService;
+            this.productData = productData;
+        }
 
-            if (basketItem != null)
-            {
-                if (raiseQuantity != null)
-                {
-                    bool result = await raiseQuantity();
+        public async Task<bool> AddProduct(ProductModel productModel)
+        {
+            var basketItem = await GetBasketItem(productModel.Id);
 
-                    if (result)
-                    {
-                        await RaiseQuantity(productId);
-                    }
-                }
-            }
-            else
+            var canAdd = basketItem == null;
+            if (canAdd)
             {
-                Products.Add(new BasketItemModel() { Product = productModel });
+                var products = await GetBasketItems();
+                products.Add(new BasketItemModel() { Product = productModel, Quantity = 1 });
+
+                await UpdateCookie(products);
             }
+
+            return canAdd;
         }
 
         public async Task<BasketItemModel> GetBasketItem(int productId)
         {
-            var basketItem = Products.FirstOrDefault(x => x.Product.Id == productId);
+            var basketItems = await GetBasketItems();
+            var basketItem = basketItems.FirstOrDefault(x => x.Product.Id == productId);
             return basketItem;
         }
 
         public async Task RemoveProduct(int productId)
         {
-            var basketItem = await GetBasketItem(productId);
-            Products.Remove(basketItem);
+            var basketItems = await GetBasketItems();
+            basketItems.RemoveAll(x => x.Product.Id == productId);
+            await UpdateCookie(basketItems);
         }
 
         public async Task RaiseQuantity(int productId)
         {
-            var basketItem = await GetBasketItem(productId);
+            var basketItems = await GetBasketItems();
+            var basketItem = basketItems.FirstOrDefault(x => x.Product.Id == productId);
 
             if (basketItem.Quantity + 1 > basketItem.Product.Amount)
             {
@@ -55,17 +83,92 @@ namespace shu_bike_shop
             }
 
             basketItem.Quantity++;
+
+            await UpdateCookie(basketItems);
         }
 
-        public Task<List<BasketItemModel>> GetBasketItems()
+        public async Task ClearBasket()
         {
-            return Task.FromResult(Products);
+            await UpdateCookie(new List<BasketItemModel>());
         }
 
-        public Task ClearBasket()
+        private async Task UpdateCookie(List<BasketItemModel> items)
         {
-            Products = new List<BasketItemModel>();
-            return Task.FromResult(true);
+            await SetBusy(true);
+            var list = items.Select(x => new ProductCookieModel() { ProductId = x.Product.Id, Quantity = x.Quantity }).ToList();
+            await cookieService.WriteCookie(ProductsCookieName, list.ToBson(), 10);
+            await SetBusy(false);
+        }
+
+        private async Task SetBusy(bool b)
+        {
+            await cookieService.WriteCookie(ServiceBusyCookie, b, 1);
+        }
+
+        private async Task<bool> IsBusy()
+        {
+            var busy = await cookieService.GetCookie<string>(ServiceBusyCookie);
+
+            if (string.IsNullOrEmpty(busy))
+            {
+                return false;
+            }
+
+            return bool.Parse(busy);
+        }
+
+        private async Task<List<BasketItemModel>> GetCookie()
+        {
+            var readCookie = await cookieService.GetCookie<string>(ProductsCookieName);
+            try
+            {
+                var basketItems = new List<BasketItemModel>();
+
+                if (!string.IsNullOrEmpty(readCookie))
+                {
+                    var productCookies = SerializationExtensions.FromBson<ProductCookieModel>(readCookie);
+                    foreach (var cookie in productCookies)
+                    {
+                        try
+                        {
+                            BasketItemModel basketItem = new()
+                            {
+                                Product = await productData.GetProduct(cookie.ProductId),
+                                Quantity = cookie.Quantity
+                            };
+
+                            basketItems.Add(basketItem);
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+
+                    return basketItems;
+                }
+            }
+            catch
+            {
+                await ClearBasket();
+            }
+
+            return new List<BasketItemModel>();
+        }
+
+        public async Task<List<BasketItemModel>> GetBasketItems()
+        {
+            while (await IsBusy())
+            {
+                await Task.Delay(250);
+            }
+
+            return await GetCookie();
+        }
+
+        public Task SetBasketItems(List<BasketItemModel> basketItems)
+        {
+            return UpdateCookie(basketItems);
         }
     }
 }

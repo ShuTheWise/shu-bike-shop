@@ -23,28 +23,43 @@ else
         <tbody>
             @foreach (var basketItem in basketItems)
             {
-            <tr>
-                <td>
-                    <img width="150" src="@basketItem.Product.ImageUrl" />
-                </td>
-                <td>@basketItem.Product.Name</td>
-                <td>
-                    <input class="form-group mx-sm-1 mb-1" type="number" @bind="@basketItem.Quantity" min="1" />
-                </td>
-                <td>@basketItem.Price</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="() => RemoveProduct(basketItem.Product.Id)">
-                        <span class="oi oi-delete"></span> Delete
-                    </button>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <img width="150" src="@basketItem.Product.ImageUrl" />
+                    </td>
+                    <td>@basketItem.Product.Name</td>
+                    <td>
+                        <select class="form-group mx-sm-1 mb-1" @onchange="(c)=>SetQuantity(c, basketItem)">
+                            @for (int i = 1; i <= @basketItem.Product.Amount; i++)
+                            {
+                                if (i == basketItem.Quantity)
+                                {
+                                    <option selected value="@i">@i</option>
+                                }
+                                else
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>@basketItem.Price</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => RemoveProduct(basketItem.Product.Id)">
+                            <span class="oi oi-delete"></span> Delete
+                        </button>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>
     <div>
         Total amount: @totalAmount
     </div>
+
+    <button class="btn btn-primary" @onclick="ClearBasket">Clear basket</button>
     <button class="btn btn-primary" disabled="@BuyingDisabled" @onclick="()=>PlaceOrder()">Place order</button>
+
     @if (!CanPlaceOrder)
     {
         <div>

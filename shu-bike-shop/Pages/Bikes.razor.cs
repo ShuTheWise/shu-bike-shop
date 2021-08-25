@@ -10,30 +10,39 @@ namespace shu_bike_shop.Pages
     public partial class Bikes
     {
         [Inject] private IProductData productData { get; set; }
-        [Inject] private IBasketService basket { get; set; }
+        [Inject] private IBasketService basketService { get; set; }
         [Inject] private IJSRuntime jSRuntime { get; set; }
 
         private List<BikeModel> bikes;
 
         protected override async Task OnInitializedAsync()
         {
+            await Task.Delay(500);
             bikes = await productData.GetProducts<BikeModel>();
         }
 
         private async Task AddProductToBasket(ProductModel productModel)
         {
-            try
-            {
-                var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
+            var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
 
-                if (add)
-                {
-                    await basket.AddProduct(productModel, () => jSRuntime.Confirm("Item already in the basket, add again?"));
-                }
-            }
-            catch (InsufficientProductAmountException ex)
+            if (add)
             {
-                await jSRuntime.Inform(ex.Message);
+                var b = await basketService.AddProduct(productModel);
+
+                if (!b)
+                {
+                    if (await jSRuntime.Confirm("Item already in the basket, add again?"))
+                    {
+                        try
+                        {
+                            await basketService.RaiseQuantity(productModel.Id);
+                        }
+                        catch (InsufficientProductAmountException ex)
+                        {
+                            await jSRuntime.Inform(ex.Message);
+                        }
+                    }
+                }
             }
         }
     }

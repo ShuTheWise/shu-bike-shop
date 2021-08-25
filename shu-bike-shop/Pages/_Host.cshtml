@@ -5,6 +5,7 @@
     Layout = null;
 }
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,3 +34,39 @@
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>
+<script>
+    window.blazorExtensions = {
+
+        WriteCookie: function (name, value, days) {
+
+            var expires;
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            }
+            else {
+                expires = "";
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        },
+
+        GetCookie: function (cookieKey) {
+
+            let cookieName = `${cookieKey}=`;
+
+            let cookieArray = document.cookie.split(';');
+
+            for (let cookie of cookieArray) {
+
+                while (cookie.charAt(0) == ' ') {
+                    cookie = cookie.substring(1, cookie.length);
+                }
+
+                if (cookie.indexOf(cookieName) == 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+        }
+    }
+</script>
