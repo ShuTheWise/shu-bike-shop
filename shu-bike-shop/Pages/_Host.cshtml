@@ -18,6 +18,7 @@
     <link href="shu-bike-shop.styles.css" rel="stylesheet" />
 </head>
 <body>
+       @*@(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))*@
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">

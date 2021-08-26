@@ -1,4 +1,15 @@
 ﻿@page "/"
 
+@inject ModalService ms
+
 <img src="images/logo.png" />
 <h1>Welcome to Shu Bike Shop!</h1>
+
+<button @onclick="()=>ShowModal()">Show modal</button>
+
+@code{
+    async Task ShowModal()
+    {
+        ms.Confirm("hi dev");
+    }
+}

@@ -68,7 +68,8 @@ namespace shu_bike_shop.Pages
             await basketService.ClearBasket();
             basketItems = new List<BasketItemModel>();
 
-            await modalService.Inform($"Your order is placed, your Order number is { orderModel.Id }");
+            //modalService.Confirm("Or");
+            //await modalService.Inform($"Your order is placed, your Order number is { orderModel.Id }");
             await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
         }
 

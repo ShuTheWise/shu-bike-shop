@@ -2,30 +2,43 @@
 using DataAccessLibrary.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace shu_bike_shop.Shared
 {
-    public partial class ConfirmModal
+    public class ModalResult
     {
-        [Parameter]
-        public string Title { get; set; } = "Title";
 
+    }
+
+    public interface IModal
+    {
+        event Action<ModalResult> OnClose;
+    }
+
+    public partial class ConfirmModal : IModal
+    {
+
+        [Parameter]
         public string Text { get; set; } = "Lorem ipsum";
 
-        [Parameter]
-        public EventCallback<bool> OnClose { get; set; }
+        public event Action<ModalResult> OnClose;
 
-        private Task ModalCancel()
+        private void ModalCancel()
         {
-            return OnClose.InvokeAsync(false);
+            ModalResult m = new();
+            OnClose?.Invoke(m);
         }
 
-        private Task ModalOk()
+        private void ModalOk()
         {
-            return OnClose.InvokeAsync(true);
+            ModalResult m = new();
+            OnClose?.Invoke(m);
         }
+
+        //public Task<ModalResult> 
     }
 }
