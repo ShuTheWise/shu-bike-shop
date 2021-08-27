@@ -1,0 +1,13 @@
+﻿@using DataAccessLibrary
+@if (parent.PayForm == 1)
+{
+    <div>
+        <br />
+        @if (parent.orderModel is { PaymentStatus: PaymentStatus.NotPaid })
+        {
+            <button type="button" class="btn btn-primary" @onclick="GoToHostedCheckoutPage">
+                Pay with Ingenico
+            </button>
+        }
+    </div>
+}

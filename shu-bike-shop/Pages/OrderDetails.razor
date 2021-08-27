@@ -6,8 +6,16 @@
     Order details
 </h1>
 
-@if (orderModel is { PaymentStatus: PaymentStatus.NotPaid })
+<select name="AuthorizationMode" @bind="PayForm">
+    <option value="">Select form</option>
+    <option value="1">Ingenico</option>
+    <option value="2">Shu Bike Shop</option>
+</select>
+
+@if (orderModel is not { PaymentStatus: PaymentStatus.Paid })
 {
+    <HostedCheckout parent="this">
+    </HostedCheckout>
     <PayForOrder parent="this">
     </PayForOrder>
 }

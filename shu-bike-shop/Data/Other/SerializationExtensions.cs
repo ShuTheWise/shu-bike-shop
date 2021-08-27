@@ -38,18 +38,5 @@ namespace shu_bike_shop
                 return serializer.Deserialize<IList<T>>(reader);
             }
         }
-
-        //public static IDictionary<T, U> FromBson<T, U>(string s)
-        //{
-        //    byte[] data = Convert.FromBase64String(s);
-
-        //    MemoryStream ms = new MemoryStream(data);
-        //    using (BsonDataReader reader = new BsonDataReader(ms))
-        //    {
-        //        reader.ReadRootValueAsArray = true;
-        //        JsonSerializer serializer = new JsonSerializer();
-        //        return serializer.Deserialize<IDictionary<T, U>>(reader);
-        //    }
-        //}
     }
 }

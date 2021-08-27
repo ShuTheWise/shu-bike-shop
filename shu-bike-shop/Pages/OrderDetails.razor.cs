@@ -1,5 +1,6 @@
 ﻿using DataAccessLibrary;
 using DataAccessLibrary.Models;
+using Ingenico.Direct.Sdk.Domain;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,6 +11,9 @@ namespace shu_bike_shop.Pages
     {
         [Parameter] public int? Id { get; set; }
 
+        [Parameter] public HostedCheckout HostedCheckout { get; set; }
+
+        public int? PayForm { get; private set; }
         public OrderModel orderModel { get; private set; }
         public User user { get; private set; }
 
@@ -47,8 +51,21 @@ namespace shu_bike_shop.Pages
             }
 
             loaded = true;
+        }
 
-            //StateHasChanged();
+        public Order GetOrder()
+        {
+            var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+
+            var order = new Order()
+            {
+                AmountOfMoney = new AmountOfMoney()
+                {
+                    Amount = amountOfMoney,
+                    CurrencyCode = "EUR"
+                }
+            };
+            return order;
         }
 
         protected override async Task OnInitializedAsync()

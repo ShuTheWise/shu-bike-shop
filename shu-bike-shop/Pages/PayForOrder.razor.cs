@@ -2,7 +2,6 @@
 using DataAccessLibrary.Models;
 using Ingenico.Direct.Sdk.Domain;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using PaymentAccessService;
 using System;
 using System.Collections.Generic;
@@ -72,17 +71,7 @@ namespace shu_bike_shop.Pages
 
         private CreatePaymentRequest CreateRequestWithoutCreditCardInfo()
         {
-            var amountOfMoney = long.Parse((parent.orderModel.TotalAmount * 100).ToString());
-
-            var order = new Order()
-            {
-                AmountOfMoney = new AmountOfMoney()
-                {
-                    Amount = amountOfMoney,
-                    CurrencyCode = "EUR"
-                }
-            };
-
+            Order order = parent.GetOrder();
             CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest()
             {
                 Order = order,

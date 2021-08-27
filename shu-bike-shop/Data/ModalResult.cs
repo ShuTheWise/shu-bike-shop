@@ -2,10 +2,6 @@
 
 namespace shu_bike_shop
 {
-    public class Ok
-    {
-
-    }
     public class ModalResult
     {
         public object Data { get; }

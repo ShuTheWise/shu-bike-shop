@@ -18,7 +18,7 @@ namespace DataAccessLibrary
 
         public async Task<TransactionModel> AddTransaction(TransactionCreateModel model)
         {
-            string sql = @$"insert into transactions (amount, paymentproductid, username, cardholdername, orderid, errormessage, responsemessage, status, paymentid) values (@Amount, @PaymentProductId, @Username, @CardholderName, @OrderId, @ErrorMessage, @ResponseMessage, @Status, @PaymentId) returning id";
+            string sql = "insert into transactions (amount, paymentproductid, username, cardholdername, orderid, errormessage, responsemessage, status, paymentid) values (@Amount, @PaymentProductId, @Username, @CardholderName, @OrderId, @ErrorMessage, @ResponseMessage, @Status, @PaymentId) returning id";
 
             int transactionId = await db.SaveData<TransactionCreateModel, int>(sql, model);
 
