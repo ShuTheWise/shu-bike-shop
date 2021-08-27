@@ -1,43 +1,51 @@
 ﻿using Microsoft.AspNetCore.Components;
 using shu_bike_shop.Shared;
 using System;
+using System.Threading.Tasks;
 
 namespace shu_bike_shop
 {
     public class ModalReference
     {
-        public event Action<IModal> OnCompRefSet;
-
         private IModal compRef;
 
         public IModal CompRef
         {
-            get => compRef; 
+            get => compRef;
             set
             {
-                if (value != null && compRef != value && OnCompRefSet != null)
-                {
-                    OnCompRefSet(value);
-                }
                 compRef = value;
             }
         }
 
         public RenderFragment RenderFragment { get; set; }
+
+        public Task<ModalResult> GetModalResult()
+        {
+            while (compRef == null)
+            {
+
+            }
+            //await Task.Delay(1000);
+            return compRef.GetModalResult();
+        }
     }
 
     public class ModalService
     {
-        //internal event Action<ModalReference> OnModalClose;
         internal event Action<ModalReference> OnModalShow;
+        internal event Action<ModalReference> OnModalClose;
 
-        public bool Confirm(string message)
+        public async Task<bool> Confirm(string message)
         {
             ModalReference modalReference = new();
             modalReference.RenderFragment = GetRenderFragment<ConfirmModal>(message, modalReference);
-            OnModalShow?.Invoke(modalReference);
 
-            return false;
+            OnModalShow?.Invoke(modalReference);
+            var modalResult = await modalReference.GetModalResult().ConfigureAwait(false);
+            OnModalClose?.Invoke(modalReference);
+
+            return true;
         }
 
         private RenderFragment GetRenderFragment<T>(string text, ModalReference modalReference) where T : notnull, IComponent
@@ -49,11 +57,6 @@ namespace shu_bike_shop
                  builder.AddComponentReferenceCapture(2, compRef => modalReference.CompRef = (IModal)compRef);
                  builder.CloseComponent();
              });
-        }
-
-        public void ModalClosed(ModalReference modalRefernce, ModalResult modalResult)
-        {
-
         }
     }
 }
