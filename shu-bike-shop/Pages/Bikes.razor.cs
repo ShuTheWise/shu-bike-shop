@@ -11,19 +11,18 @@ namespace shu_bike_shop.Pages
     {
         [Inject] private IProductData productData { get; set; }
         [Inject] private IBasketService basketService { get; set; }
-        [Inject] private IJSRuntime jSRuntime { get; set; }
+        [Inject] private IModalService modalService { get; set; }
 
         private List<BikeModel> bikes;
 
         protected override async Task OnInitializedAsync()
         {
-            await Task.Delay(500);
             bikes = await productData.GetProducts<BikeModel>();
         }
 
         private async Task AddProductToBasket(ProductModel productModel)
         {
-            var add = await jSRuntime.Confirm($"Add {productModel.Name} to the basket?");
+            var add = await modalService.Confirm($"Add {productModel.Name} to the basket?");
 
             if (add)
             {
@@ -31,7 +30,7 @@ namespace shu_bike_shop.Pages
 
                 if (!b)
                 {
-                    if (await jSRuntime.Confirm("Item already in the basket, add again?"))
+                    if (await modalService.Confirm("Item already in the basket, add again?"))
                     {
                         try
                         {
@@ -39,7 +38,7 @@ namespace shu_bike_shop.Pages
                         }
                         catch (InsufficientProductAmountException ex)
                         {
-                            await jSRuntime.Inform(ex.Message);
+                            await modalService.Inform(ex.Message);
                         }
                     }
                 }

@@ -4,7 +4,7 @@ namespace shu_bike_shop.Shared
 {
     public partial class Modal
     {
-        [Inject] private ModalService modalService { get; set; }
+        [Inject] private IModalService modalService { get; set; }
 
         [Parameter] public RenderFragment ChildContent { get; set; }
 

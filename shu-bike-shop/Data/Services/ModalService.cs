@@ -5,47 +5,33 @@ using System.Threading.Tasks;
 
 namespace shu_bike_shop
 {
-    public class ModalReference
+    public class ModalService : IModalService
     {
-        private IModal compRef;
+        public event Action<ModalReference> OnModalShow;
+        public event Action<ModalReference> OnModalClose;
 
-        public IModal CompRef
-        {
-            get => compRef;
-            set
-            {
-                compRef = value;
-            }
-        }
-
-        public RenderFragment RenderFragment { get; set; }
-
-        public Task<ModalResult> GetModalResult()
-        {
-            while (compRef == null)
-            {
-
-            }
-            //await Task.Delay(1000);
-            return compRef.GetModalResult();
-        }
-    }
-
-    public class ModalService
-    {
-        internal event Action<ModalReference> OnModalShow;
-        internal event Action<ModalReference> OnModalClose;
-
-        public async Task<bool> Confirm(string message)
+        public async Task<ModalResult> Show<T>(string message) where T : notnull, IComponent
         {
             ModalReference modalReference = new();
-            modalReference.RenderFragment = GetRenderFragment<ConfirmModal>(message, modalReference);
+            modalReference.RenderFragment = GetRenderFragment<T>(message, modalReference);
 
             OnModalShow?.Invoke(modalReference);
             var modalResult = await modalReference.GetModalResult().ConfigureAwait(false);
             OnModalClose?.Invoke(modalReference);
 
-            return true;
+            return modalResult;
+        }
+
+        public async Task<bool> Confirm(string message)
+        {
+            var modalResult = await Show<ConfirmModal>(message);
+
+            return !modalResult.Cancelled;
+        }
+
+        public async Task Inform(string message)
+        {
+            await Show<InformModal>(message);
         }
 
         private RenderFragment GetRenderFragment<T>(string text, ModalReference modalReference) where T : notnull, IComponent
@@ -54,7 +40,7 @@ namespace shu_bike_shop
              {
                  builder.OpenComponent<T>(0);
                  builder.AddAttribute(1, "Text", text);
-                 builder.AddComponentReferenceCapture(2, compRef => modalReference.CompRef = (IModal)compRef);
+                 builder.AddComponentReferenceCapture(2, compRef => modalReference.Modal = (IModal)compRef);
                  builder.CloseComponent();
              });
         }

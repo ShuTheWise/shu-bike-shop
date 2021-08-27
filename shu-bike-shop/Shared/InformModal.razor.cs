@@ -1,23 +1,28 @@
-﻿using DataAccessLibrary;
-using DataAccessLibrary.Models;
-using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Components;
 using System.Threading.Tasks;
 
 namespace shu_bike_shop.Shared
 {
-    public partial class InformModal
+    public partial class InformModal : IModal
     {
         [Parameter]
-        public string Text { get; set; } = "Lorem ipsum";
+        public string Text { get; set; }
 
-        public EventCallback OnClose { get; set; }
+        private ModalResult modalResult;
 
-        private Task ModalOk()
+        public async Task<ModalResult> GetModalResult()
         {
-            return OnClose.InvokeAsync();
+            while (modalResult == null)
+            {
+                await Task.Yield();
+            }
+
+            return modalResult;
+        }
+
+        private void ModalOk()
+        {
+            modalResult = ModalResult.Ok();
         }
     }
 }

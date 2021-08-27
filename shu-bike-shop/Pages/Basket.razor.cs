@@ -10,7 +10,7 @@ namespace shu_bike_shop.Pages
 {
     public partial class Basket
     {
-        [Inject] private ModalService modalService{ get; set; }
+        [Inject] private IModalService modalService{ get; set; }
         [Inject] private IJSRuntime jSRuntime { get; set; }
         [Inject] private IBasketService basketService { get; set; }
         [Inject] private IOrderData orderData { get; set; }

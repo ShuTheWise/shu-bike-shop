@@ -3,42 +3,30 @@ using System.Threading.Tasks;
 
 namespace shu_bike_shop.Shared
 {
-    public class ModalResult
-    {
-
-    }
-
-    public interface IModal
-    {
-        Task<ModalResult> GetModalResult();
-    }
-
     public partial class ConfirmModal : IModal
     {
         [Parameter]
-        public string Text { get; set; } = "Lorem ipsum";
+        public string Text { get; set; }
 
-        public ModalResult modalResult;
+        private ModalResult modalResult;
 
         private void ModalCancel()
         {
-            ModalResult m = new();
-            modalResult = m;
+            modalResult = ModalResult.Cancel();
         }
 
         private void ModalOk()
         {
-            ModalResult m = new();
-            modalResult = m;
+            modalResult = ModalResult.Ok();
         }
 
-        public Task<ModalResult> GetModalResult()
+        public async Task<ModalResult> GetModalResult()
         {
             while (modalResult == null)
             {
-
+                await Task.Yield();
             }
-            return Task.FromResult(modalResult);
+            return await Task.FromResult(modalResult);
         }
     }
 }
