@@ -21,7 +21,7 @@ namespace shu_bike_shop.Pages
         [Inject] private ITokenData tokenData { get; set; }
         [Inject] private IPaymentService paymentService { get; set; }
         [Inject] private ITransactionsData transactionData { get; set; }
-        [Inject] private IJSRuntime jSRuntime { get; set; }
+        [Inject] private IModalService modalService { get; set; }
 
         private CardForm cardForm;
         private List<TokenResponse> userTokens;
@@ -93,7 +93,7 @@ namespace shu_bike_shop.Pages
 
         private async Task PayAsync(CardPaymentMethodSpecificInput cardPaymentMethod)
         {
-            var pay = await jSRuntime.Confirm($"Pay for order ?");
+            var pay = await modalService.Confirm($"Pay for order ?");
 
             if (!pay)
             {
@@ -139,11 +139,11 @@ namespace shu_bike_shop.Pages
 
             if (AliasId.HasValue)
             {
-                await jSRuntime.Inform("Payment sucessful");
+                await modalService.Inform("Payment sucessful");
             }
             else
             {
-                if (await jSRuntime.Confirm("Payment sucessful, do you want to save card information for future use?"))
+                if (await modalService.Confirm("Payment sucessful, do you want to save card information for future use?"))
                 {
                     var createdTokenResponse = await CreateToken(cardPaymentMethod);
                     await tokenData.AddToken(parent.user.Name, createdTokenResponse.Token);
@@ -162,7 +162,7 @@ namespace shu_bike_shop.Pages
                         }
                     }
 
-                    await jSRuntime.Inform(message2);
+                    await modalService.Inform(message2);
                 }
             }
 

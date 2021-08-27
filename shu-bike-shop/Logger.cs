@@ -8,10 +8,8 @@ namespace shu_bike_shop
 {
     public class Logger : ILogger
     {
-
-
         private readonly HttpClient client = new();
-        private IConfiguration configuration;
+        private readonly IConfiguration configuration;
 
         public Logger(IConfiguration configuration)
         {

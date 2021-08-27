@@ -9,7 +9,7 @@ namespace shu_bike_shop.Pages
     public partial class AddBikes
     {
         [Inject] private NavigationManager navigationManager { get; set; }
-        [Inject] private IJSRuntime runtime { get; set; }
+        [Inject] private IModalService modalService { get; set; }
         [Inject] private IProductData productData { get; set; }
 
         private BikeCreateModel model = new();
@@ -25,7 +25,7 @@ namespace shu_bike_shop.Pages
             }
             catch
             {
-                await runtime.Inform("Something went wrong");
+                await modalService.Inform("Something went wrong");
             }
         }
     }

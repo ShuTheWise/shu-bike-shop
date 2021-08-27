@@ -10,8 +10,7 @@ namespace shu_bike_shop.Pages
 {
     public partial class Basket
     {
-        [Inject] private IModalService modalService{ get; set; }
-        [Inject] private IJSRuntime jSRuntime { get; set; }
+        [Inject] private IModalService modalService { get; set; }
         [Inject] private IBasketService basketService { get; set; }
         [Inject] private IOrderData orderData { get; set; }
         [Inject] private IProductData productData { get; set; }
@@ -68,9 +67,7 @@ namespace shu_bike_shop.Pages
             await basketService.ClearBasket();
             basketItems = new List<BasketItemModel>();
 
-            //modalService.Confirm("Or");
-            //await modalService.Inform($"Your order is placed, your Order number is { orderModel.Id }");
-            await jSRuntime.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
+            await modalService.Confirm($"Your order is placed, your Order number is {orderModel.Id}");
         }
 
         private void RefreshTotalAmount()
@@ -84,7 +81,7 @@ namespace shu_bike_shop.Pages
 
         private async Task RemoveProduct(int id)
         {
-            if (await jSRuntime.Confirm("Remove product from the basket?"))
+            if (await modalService.Confirm("Remove product from the basket?"))
             {
                 basketItems.RemoveAll(x => x.Product.Id == id);
 

@@ -18,7 +18,7 @@
     <link href="shu-bike-shop.styles.css" rel="stylesheet" />
 </head>
 <body>
-       @*@(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))*@
+    @*@(await Html.RenderComponentAsync<App>(RenderMode.ServerPrerendered))*@
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">
@@ -36,8 +36,11 @@
 </body>
 </html>
 <script>
-    window.blazorExtensions = {
+    var width;
+    var scrollYOffset;
+    var pos;
 
+    window.blazorExtensions = {
         WriteCookie: function (name, value, days) {
 
             var expires;
@@ -68,6 +71,20 @@
                     return cookie.substring(cookieName.length, cookie.length);
                 }
             }
+        },
+
+        ScrollLock: function (activate) {
+
+            let overflow;
+            if (activate)
+            {
+                overflow = 'hidden';
+            }
+            else {
+                overflow = 'auto';
+            }
+
+            document.body.style.overflow = overflow;
         }
     }
 </script>

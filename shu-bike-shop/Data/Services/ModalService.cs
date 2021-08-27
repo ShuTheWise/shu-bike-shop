@@ -9,13 +9,14 @@ namespace shu_bike_shop
     {
         public event Action<ModalReference> OnModalShow;
         public event Action<ModalReference> OnModalClose;
-
+        
         public async Task<ModalResult> Show<T>(string message) where T : notnull, IComponent
         {
             ModalReference modalReference = new();
             modalReference.RenderFragment = GetRenderFragment<T>(message, modalReference);
 
             OnModalShow?.Invoke(modalReference);
+
             var modalResult = await modalReference.GetModalResult().ConfigureAwait(false);
             OnModalClose?.Invoke(modalReference);
 
