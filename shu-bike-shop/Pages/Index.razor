@@ -1,15 +1,6 @@
 ﻿@page "/"
 
-@inject IModalService ms
-
 <img src="images/logo.png" />
 <h1>Welcome to Shu Bike Shop!</h1>
 
-<button @onclick="()=>ShowModal()">Show modal</button>
-
-@code{
-    async Task ShowModal()
-    {
-        var a = await ms.Confirm("hi dev");
-    }
-}
+<button @onclick="HostedCheckout">Show modal</button>

@@ -11,6 +11,8 @@ namespace PaymentAccessService
         Task<CreatePaymentResponse> CreateTestPayment();
         Task<CreatePaymentResponse> CreatePayment(CreatePaymentRequest createPaymentRequest);
         IMerchantClient GetMerchant();
+        CreatePaymentRequest GetTestCreatePaymentRequest();
+
         string MerchantId { get; }
     }
 }
