@@ -19,8 +19,8 @@ namespace shu_bike_shop
 
         public async Task<User> GetCurrentUser()
         {
-            var user = httpContextAccessor.HttpContext.User;
-            if (user.Identity.Name == null)
+            var user = httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.Name == null)
             {
                 return null;
             }

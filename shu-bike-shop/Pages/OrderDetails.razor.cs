@@ -11,10 +11,8 @@ namespace shu_bike_shop.Pages
     {
         [Parameter] public int? Id { get; set; }
 
-        [Parameter] public HostedCheckout HostedCheckout { get; set; }
-
         public int? PayForm { get; private set; }
-        public OrderModel orderModel { get; private set; }
+        public OrderModel OrderModel { get; private set; }
         public User user { get; private set; }
 
         [Inject] private IOrderData orderData { get; set; }
@@ -30,11 +28,11 @@ namespace shu_bike_shop.Pages
 
             if (user != null && Id.HasValue)
             {
-                orderModel = await orderData.GetOrder(Id.Value, user.Name);
+                OrderModel = await orderData.GetOrder(Id.Value, user.Name);
 
-                if (orderModel != null)
+                if (OrderModel != null)
                 {
-                    var orderProducts = await orderData.GetOrderProducts(orderModel.Id);
+                    var orderProducts = await orderData.GetOrderProducts(OrderModel.Id);
 
                     orderProductDetailsModel = new List<OrderProductDetailsModel>();
                     foreach (var item in orderProducts)
@@ -55,7 +53,7 @@ namespace shu_bike_shop.Pages
 
         public Order GetOrder()
         {
-            var amountOfMoney = long.Parse((orderModel.TotalAmount * 100).ToString());
+            var amountOfMoney = long.Parse((OrderModel.TotalAmount * 100).ToString());
 
             var order = new Order()
             {

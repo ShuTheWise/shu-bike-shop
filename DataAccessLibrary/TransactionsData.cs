@@ -44,7 +44,7 @@ namespace DataAccessLibrary
         public Task<TransactionModel> GetTransactionByPaymentId(long paymentId)
         {
             string sql = "select * from transactions where paymentid = @paymentId";
-            return db.LoadSingle<TransactionModel, dynamic>(sql, new { paymentId });
+            return db.LoadSingleOrDefault<TransactionModel, dynamic>(sql, new { paymentId });
         }
 
         public Task UpdateTransactionByPaymentId(long paymentId, dynamic updateModel)

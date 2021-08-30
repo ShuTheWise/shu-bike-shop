@@ -48,6 +48,7 @@ namespace shu_bike_shop.Controllers
                 dynamic parameters = new
                 {
                     status = paymentModel.Payment.Status,
+                    statuscode = paymentModel.Payment.StatusOutput.StatusCode,
                     orderid = transaction.OrderId,
                     paymentidsuffix = paymentIdSuffix
                 };

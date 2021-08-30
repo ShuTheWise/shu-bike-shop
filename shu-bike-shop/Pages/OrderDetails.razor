@@ -6,51 +6,62 @@
     Order details
 </h1>
 
-<select name="AuthorizationMode" @bind="PayForm">
-    <option value="">Select form</option>
-    <option value="1">Ingenico</option>
-    <option value="2">Shu Bike Shop</option>
-</select>
 
-@if (orderModel is not { PaymentStatus: PaymentStatus.Paid })
+@if (OrderModel is { PaymentStatus: PaymentStatus.NotPaid })
 {
-    <HostedCheckout parent="this">
-    </HostedCheckout>
-    <PayForOrder parent="this">
-    </PayForOrder>
+    <select name="AuthorizationMode" @bind="PayForm">
+        <option value="">Select form</option>
+        <option value="1">Ingenico</option>
+        <option value="2">Shu Bike Shop</option>
+    </select>
+}
+
+@if (OrderModel is not { PaymentStatus: PaymentStatus.Paid })
+{
+    @switch (PayForm)
+    {
+        case 1:
+            <HostedCheckout parent="this">
+            </HostedCheckout>
+            break;
+        case 2:
+            <PayForOrder parent="this">
+            </PayForOrder>
+            break;
+    }
 }
 
 @if (!loaded)
 {
     <Loading></Loading>
 }
-else if (orderModel == null)
+else if (OrderModel == null)
 {
     <p>
         <em>"There is nothing here..."</em>
     </p>
 }
 
-@if (orderModel != null)
+@if (OrderModel != null)
 {
     <br />
     <table class="table">
         <tbody>
             <tr>
                 <td>Order Number</td>
-                <td>@orderModel.Id</td>
+                <td>@OrderModel.Id</td>
             </tr>
             <tr>
                 <td>OrderStatus</td>
-                <td>@orderModel.OrderStatus</td>
+                <td>@OrderModel.OrderStatus</td>
             </tr>
             <tr>
                 <td>Payment status</td>
-                <td>@orderModel.PaymentStatus</td>
+                <td>@OrderModel.PaymentStatus</td>
             </tr>
             <tr>
                 <td>Total amount</td>
-                <td>@orderModel.TotalAmount</td>
+                <td>@OrderModel.TotalAmount</td>
             </tr>
         </tbody>
     </table>

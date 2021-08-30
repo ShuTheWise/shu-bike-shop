@@ -49,8 +49,15 @@ namespace shu_bike_shop.Pages
         {
             if (parent.user != null)
             {
-                userTokens = await GetUserTokensAsync(parent.user.Name);
-                userTokenAliases = userTokens.Select(x => x.Card.Alias).ToList();
+                try
+                {
+                    userTokens = await GetUserTokensAsync(parent.user.Name);
+                    userTokenAliases = userTokens.Select(x => x.Card.Alias).ToList();
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -92,9 +99,9 @@ namespace shu_bike_shop.Pages
             TransactionCreateModel transaction = new TransactionCreateModel
             {
                 PaymentProductId = cardPaymentMethod.PaymentProductId.Value,
-                Amount = parent.orderModel.TotalAmount,
+                Amount = parent.OrderModel.TotalAmount,
                 Username = parent.user.Name,
-                OrderId = parent.orderModel.Id,
+                OrderId = parent.OrderModel.Id,
                 CardholderName = cardPaymentMethod.Card.CardholderName
             };
 
@@ -111,6 +118,7 @@ namespace shu_bike_shop.Pages
                 var json = response.ToJson();
                 transaction.ResponseMessage = json;
                 transaction.Status = response.Payment.Status;
+                transaction.StatusCode = response.Payment.StatusOutput.StatusCode.GetValueOrDefault();
 
                 var paymentId = response.Payment.Id.Split('_');
                 transaction.PaymentId = long.Parse(paymentId[0]);
@@ -155,7 +163,7 @@ namespace shu_bike_shop.Pages
                 }
             }
 
-            while (parent.orderModel.PaymentStatus == PaymentStatus.NotPaid)
+            while (parent.OrderModel.PaymentStatus == PaymentStatus.NotPaid)
             {
                 await parent.RefreshOrder();
             }
@@ -165,12 +173,14 @@ namespace shu_bike_shop.Pages
         {
             try
             {
-                var body = new CreateTokenRequest();
-                TokenCardSpecificInput tokenCardSpecificInput = new TokenCardSpecificInput();
-                tokenCardSpecificInput.Data = new Ingenico.Direct.Sdk.Domain.TokenData();
+                TokenCardSpecificInput tokenCardSpecificInput = new();
+                tokenCardSpecificInput.Data = new();
                 tokenCardSpecificInput.Data.Card = input.Card;
+                
+                CreateTokenRequest body = new();
                 body.PaymentProductId = input.PaymentProductId.Value;
                 body.Card = tokenCardSpecificInput;
+                
                 return await paymentService.GetMerchant().Tokens.CreateToken(body);
             }
             catch

@@ -3,7 +3,8 @@
 {
     <div>
         <br />
-        @if (parent.orderModel is { PaymentStatus: PaymentStatus.NotPaid })
+
+        @if (parent.OrderModel is { PaymentStatus: PaymentStatus.NotPaid })
         {
             <button type="button" class="btn btn-primary" @onclick="GoToHostedCheckoutPage">
                 Pay with Ingenico

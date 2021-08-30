@@ -10,5 +10,6 @@
         public int OrderId { get; set; }
         public string ErrorMessage { get; set; }
         public string ResponseMessage { get; set; }
+        public string Status { get; set; }
     }
 }

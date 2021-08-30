@@ -8,6 +8,9 @@ namespace shu_bike_shop.Pages
 {
     public partial class Index
     {
-
+        protected override async Task OnInitializedAsync()
+        {
+       
+        }
     }
 }

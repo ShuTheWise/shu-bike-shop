@@ -1,0 +1,16 @@
+﻿@page "/payment/{Id:int}"
+
+
+@if (!success.HasValue)
+{
+    <h3>Processing payment</h3>
+    <Loading></Loading>
+}
+else
+{
+    <h3>@message</h3>
+
+    <button type="button" class="btn btn-primary" @onclick="()=>BackToOrder()">
+        Go back to order details page
+    </button>
+}
