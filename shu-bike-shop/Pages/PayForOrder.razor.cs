@@ -21,6 +21,8 @@ namespace shu_bike_shop.Pages
         [Inject] private IPaymentService paymentService { get; set; }
         [Inject] private ITransactionsData transactionData { get; set; }
         [Inject] private IModalService modalService { get; set; }
+        [Inject] private NavigationManager navigationManager { get; set; }
+
 
         private CardForm cardForm;
         private List<TokenResponse> userTokens;
@@ -114,6 +116,18 @@ namespace shu_bike_shop.Pages
                 createPaymentRequest.CardPaymentMethodSpecificInput.IsRecurring = IsRecurring;
                 createPaymentRequest.CardPaymentMethodSpecificInput.AuthorizationMode = AuthorizationMode;
 
+                RedirectionData redirectionData = new();
+                redirectionData.ReturnUrl = navigationManager.Uri;
+
+                ThreeDSecure threeDSecure = new();
+                threeDSecure.ChallengeCanvasSize = "600x400";
+                threeDSecure.ChallengeIndicator = "challenge-requested";
+                threeDSecure.ExemptionRequest = "none";
+                threeDSecure.RedirectionData = redirectionData;
+                threeDSecure.SkipAuthentication = true;
+
+                createPaymentRequest.CardPaymentMethodSpecificInput.ThreeDSecure = threeDSecure;
+
                 var response = await paymentService.CreatePayment(createPaymentRequest);
                 var json = response.ToJson();
                 transaction.ResponseMessage = json;
@@ -133,6 +147,12 @@ namespace shu_bike_shop.Pages
 
             //make a call to api controller or sth else so it is not awaited here
             await transactionData.AddTransaction(transaction);
+
+            if (!string.IsNullOrEmpty(transaction.ErrorMessage))
+            {
+                await modalService.Inform("Payment unsucessful");
+                return;
+            }
 
             if (AliasId.HasValue)
             {
@@ -176,11 +196,11 @@ namespace shu_bike_shop.Pages
                 TokenCardSpecificInput tokenCardSpecificInput = new();
                 tokenCardSpecificInput.Data = new();
                 tokenCardSpecificInput.Data.Card = input.Card;
-                
+
                 CreateTokenRequest body = new();
                 body.PaymentProductId = input.PaymentProductId.Value;
                 body.Card = tokenCardSpecificInput;
-                
+
                 return await paymentService.GetMerchant().Tokens.CreateToken(body);
             }
             catch

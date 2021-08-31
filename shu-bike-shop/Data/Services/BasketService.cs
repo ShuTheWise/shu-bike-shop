@@ -1,6 +1,5 @@
 ﻿using DataAccessLibrary;
 using DataAccessLibrary.Models;
-using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +22,7 @@ namespace shu_bike_shop
 
         public async Task<bool> AddProduct(ProductModel productModel)
         {
+
             var basketItem = await GetBasketItem(productModel.Id);
 
             var canAdd = basketItem == null;

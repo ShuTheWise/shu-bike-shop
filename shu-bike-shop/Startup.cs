@@ -59,6 +59,8 @@ namespace shu_bike_shop
             services.AddTransient<ILogger, Logger>();
             services.AddTransient<IBasketService, BasketService>();
             services.AddTransient<ICookieService, CookieService>();
+            services.AddTransient<IBasketModalService, BasketModalService>();
+
             services.AddSingleton<IModalService, ModalService>();
 
             services.AddCors(options =>

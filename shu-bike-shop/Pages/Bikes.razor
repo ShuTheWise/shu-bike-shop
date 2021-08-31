@@ -19,17 +19,19 @@ else
         <tbody>
             @foreach (var bike in bikes)
             {
-            <tr>
-                <td><img height="150px" src="@bike.ImageUrl"/></td>
-                <td>@bike.Name</td>
-                <td>@bike.Price</td>
-                <td>@bike.Amount</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike)" disabled="@(bike.Amount < 1)">
-                        <span class="oi oi-cart"> Add to basket</span>
-                    </button>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <ProductLink ProductModel="@bike" Height="150px"></ProductLink>
+                    </td>
+                    <td>@bike.Name</td>
+                    <td>@bike.Price</td>
+                    <td>@bike.Amount</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="()=>AddProductToBasket(bike)" disabled="@(bike.Amount < 1)">
+                            <span class="oi oi-cart"> Add to basket</span>
+                        </button>
+                    </td>
+                </tr>
             }
         </tbody>
     </table>

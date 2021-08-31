@@ -1,0 +1,13 @@
+﻿@using DataAccessLibrary.Models
+
+<a href="product/@ProductModel.Id">
+    <img class="zoom" src="@ProductModel.ImageUrl" height="@Height"/>
+</a>
+
+@code{
+    [Parameter]
+    public ProductModel ProductModel { get; set; }
+
+    [Parameter]
+    public string Height { get; set; }
+}

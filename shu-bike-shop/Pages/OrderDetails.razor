@@ -86,11 +86,11 @@ else if (OrderModel == null)
         <tbody>
             @foreach (var orderProduct in orderProductDetailsModel)
             {
-                <tr>
-                    <td><img height="150px" src="@orderProduct.ProductModel.ImageUrl" /></td>
-                    <td>@orderProduct.OrderProduct.Amount</td>
-                    <td>@orderProduct.OrderProduct.TotalPrice</td>
-                </tr>
+            <tr>
+                <ProductLink ProductModel="@orderProduct.ProductModel" Height="150px"></ProductLink>
+                <td>@orderProduct.OrderProduct.Amount</td>
+                <td>@orderProduct.OrderProduct.TotalPrice</td>
+            </tr>
             }
         </tbody>
     </table>
